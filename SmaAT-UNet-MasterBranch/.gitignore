@@ -5,4 +5,5 @@ logs
 checkpoints
 .ruff_cache
 .mypy_cache
-models/__pycache__
+models/__pycache__/
+__pycache__/

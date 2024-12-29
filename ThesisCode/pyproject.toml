@@ -1,0 +1,19 @@
+[project]
+name = "thesiscode"
+version = "0.1.0"
+description = "Add your description here"
+authors = [{ name = "Nikolas Stavrou", email = "n.stavrou@students.uu.nl" }]
+readme = "README.md"
+requires-python = ">=3.12.3"
+
+dependencies = [
+    "tqdm~=4.65.0",
+    "torchsummary>=1.5.1",
+    "h5py~=3.8.0",
+    "fastapi~=0.80",
+    "lightning~=2.2.1",
+    "tensorboard~=2.13.0",
+    "pandas~=1.5.3",
+    "tables>=3.9.2",
+    "matplotlib>=3.8.3",
+]

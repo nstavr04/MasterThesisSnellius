@@ -8,7 +8,6 @@ import os
 import numpy as np
 import json
 
-# NEED TO UNDERSTAND THE CODE BETTER
 
 def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
     device = torch.device(device)

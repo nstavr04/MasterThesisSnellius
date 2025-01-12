@@ -95,6 +95,8 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     # args.fast_dev_run = True
+
+    # This probably means 12 input satellite images 
     args.n_channels = 12
     # args.gpus = 1
     args.model = "UNetDS_Attention"

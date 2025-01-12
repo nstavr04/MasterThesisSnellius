@@ -81,7 +81,6 @@ class DoubleDSConv(nn.Module):
     def forward(self, x):
         return self.double_ds_conv(x)
 
-
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
@@ -127,7 +126,6 @@ class SpatialAttention(nn.Module):
         out = self.bn(out)
         scale = x * torch.sigmoid(out)
         return scale
-
 
 class CBAM(nn.Module):
     def __init__(self, input_channels, reduction_ratio=16, kernel_size=7):

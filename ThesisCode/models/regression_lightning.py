@@ -7,6 +7,9 @@ import argparse
 import numpy as np
 
 
+# Common functionalities like dataset loading, preprocessing, training and validation dataloaders, 
+# and basic model initialization are implemented in the base class.
+# It is passed to SmaAT-UNet as well
 class UNet_base(pl.LightningModule):
     @staticmethod
     def add_model_specific_args(parent_parser):
@@ -17,7 +20,9 @@ class UNet_base(pl.LightningModule):
             default="UNet",
             choices=["UNet", "UNetDS", "UNet_Attention", "UNetDS_Attention"],
         )
+        # 12 input images I think
         parser.add_argument("--n_channels", type=int, default=12)
+        # Regression
         parser.add_argument("--n_classes", type=int, default=1)
         parser.add_argument("--kernels_per_layer", type=int, default=1)
         parser.add_argument("--bilinear", type=bool, default=True)

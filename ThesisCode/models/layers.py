@@ -81,6 +81,9 @@ class DoubleDSConv(nn.Module):
     def forward(self, x):
         return self.double_ds_conv(x)
 
+# Everything upwards I think it's not being used
+######################################################
+# Everything downwards is needed
 
 class Flatten(nn.Module):
     def forward(self, x):
@@ -128,7 +131,8 @@ class SpatialAttention(nn.Module):
         scale = x * torch.sigmoid(out)
         return scale
 
-
+# I think only this class is used for SmaAT-UNet which uses in turn SpatialAttention, Channel Attention and Flatten.
+# The other classes I think that are not being used.
 class CBAM(nn.Module):
     def __init__(self, input_channels, reduction_ratio=16, kernel_size=7):
         super().__init__()

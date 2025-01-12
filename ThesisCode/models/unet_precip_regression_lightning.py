@@ -119,10 +119,20 @@ class UNetDS(Precip_regression_base):
         return logits
 
 
+# This is the model I care about to expand.
+# It is an implementation of a U-Net-based architecture that incorporates depthwise separable convolutions 
+# (DoubleConvDS, DownDS, UpDS) and attention mechanisms (CBAM).
+# It uses them from unet_parts_depthwise_separable.py
+
+# The base Precip_regression_base class is defined in regression_lightning.py and is passed as an argument.
+# It also inherits from the UNet base class.
+# It serves to set different parameters as we can see below with self. as well as defining the training, data loading etc.
 class UNetDS_Attention(Precip_regression_base):
     def __init__(self, hparams):
         super().__init__(hparams=hparams)
         self.n_channels = self.hparams.n_channels
+
+        # I think this is set as 1 in regression_lightning at UNet_Base model because we have regression
         self.n_classes = self.hparams.n_classes
         self.bilinear = self.hparams.bilinear
         reduction_ratio = self.hparams.reduction_ratio
@@ -164,7 +174,7 @@ class UNetDS_Attention(Precip_regression_base):
         logits = self.outc(x)
         return logits
 
-
+# I don't want this one
 class UNetDS_Attention_4CBAMs(Precip_regression_base):
     def __init__(self, hparams):
         super().__init__(hparams=hparams)

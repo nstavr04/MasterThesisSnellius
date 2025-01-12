@@ -5,25 +5,25 @@
 #SBATCH --gres=gpu:1                     # Number of GPUs per node
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=gpu_a100
-#SBATCH --mem-per-gpu=16G
 #SBATCH --ntasks-per-node=1                # It needs to match Trainer (devices=...)
-#SBATCH --time=3:00:00                  # Time limit hrs:min:sec
+#SBATCH --time=1:00:00                  # Time limit hrs:min:sec
 
 # Load necessary modules
-module load 2024
-module load Python/3.12.3-GCCcore-13.3.0
-module load CUDA/12.6.0
-module load cuDNN/9.5.0.50-CUDA-12.6.0
-module load NCCL/2.22.3-GCCcore-13.3.0-CUDA-12.6.0
+module load 2023
+module load Python/3.11.3-GCCcore-12.3.0
+module load HDF5/1.14.0-gompi-2023a
+module load CUDA/12.1.1
+module load cuDNN/8.9.2.26-CUDA-12.1.1
+module load NCCL/2.18.3-GCCcore-12.3.0-CUDA-12.1.1
 
 # Activate Rye
-export PATH="$HOME/.rye/shims:$PATH"
+# export PATH="$HOME/.rye/shims:$PATH"
 
 # Navigate to your project directory
-cd SmaAT-UNet-MasterBranch/
+# cd SmaAT-UNet-MasterBranch/
 
 # Sync dependencies (optional)
-rye sync --no-lock
+# rye sync --no-lock
 
 # Run test pytorch lightning script
-srun rye run python calc_metrics_test_set.py
+uv run calc_metrics_test_set.py

@@ -37,6 +37,8 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     lr_monitor = LearningRateMonitor()
     tb_logger = loggers.TensorBoardLogger(save_dir=default_save_path, name=net.__class__.__name__)
 
+
+    # If the model has the same val_loss for patience times (the default now is 15), the model will stop training. 
     earlystopping_callback = EarlyStopping(
         monitor="val_loss",
         mode="min",
@@ -45,11 +47,14 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     trainer = pl.Trainer(
         accelerator="gpu",
         devices=1,
+        # Executes only one batch, it is to debug basically that everything works quickly
         fast_dev_run=hparams.fast_dev_run,
         max_epochs=hparams.epochs,
         default_root_dir=default_save_path,
         logger=tb_logger,
         callbacks=[checkpoint_callback, earlystopping_callback, lr_monitor],
+        # 0.25 means 4 times validation per epoch, 1.0 means validation once per epoch.
+        # If it's an int e.g 5 it means to run validation every 5 training steps
         val_check_interval=hparams.val_check_interval,
     )
 
@@ -61,6 +66,8 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
 
     # This can be used to speed up training with newer GPUs:
     # https://lightning.ai/docs/pytorch/stable/advanced/speed.html#low-precision-matrix-multiplication
+    
+    # I can try it sometime. Low means fast but less precision, high means high precision but slower.
     # torch.set_float32_matmul_precision('medium')
 
     trainer.fit(model=net, ckpt_path=hparams.resume_from_checkpoint)

@@ -12,28 +12,33 @@ from root import ROOT_DIR
 from utils import dataset_precip, model_classes
 
 
-def get_model_loss(model, test_dl, loss="mse", denormalize=True, devices=1):
-    model.eval()  # or model.freeze()?
-    if loss.lower() == "mse":
-        loss_func = nn.functional.mse_loss
-    elif loss.lower() == "mae":
-        loss_func = nn.functional.l1_loss
-    else:
-        raise ValueError(f"Unknown loss: {loss}")
-    factor = 1
-    if denormalize:
-        factor = 47.83
-    # go through test set
-    with torch.no_grad():
-        loss_model = 0.0
-        for x, y_true in tqdm(test_dl, leave=False):
-            x = x.to("cuda")
-            y_pred = model(x)
-            loss_model += loss_func(y_pred.squeeze() * factor, y_true * factor, reduction="sum") / y_true.size(0)
-        loss_model /= len(test_dl)
-    return np.array(loss_model)
+# I think this has been replaced with pytorch lightning
+# We use the trainer of pytorch lightning for testing
+
+# def get_model_loss(model, test_dl, loss="mse", denormalize=True, devices=1):
+#     model.eval()  # or model.freeze()?
+#     if loss.lower() == "mse":
+#         loss_func = nn.functional.mse_loss
+#     elif loss.lower() == "mae":
+#         loss_func = nn.functional.l1_loss
+#     else:
+#         raise ValueError(f"Unknown loss: {loss}")
+#     factor = 1
+#     if denormalize:
+#         factor = 47.83
+#     # go through test set
+#     with torch.no_grad():
+#         loss_model = 0.0
+#         for x, y_true in tqdm(test_dl, leave=False):
+#             x = x.to("cuda")
+#             y_pred = model(x)
+#             loss_model += loss_func(y_pred.squeeze() * factor, y_true * factor, reduction="sum") / y_true.size(0)
+#         loss_model /= len(test_dl)
+#     return np.array(loss_model)
 
 
+# Calculates baseline metrics assuming the "persistence" model (e.g., the last input frame as prediction).
+# Computes classification metrics (precision, recall, F1 score, etc.) by thresholding the outputs.
 def get_persistence_metrics(test_dl, denormalize=True):
     loss_func = nn.functional.mse_loss
     factor = 1
@@ -90,7 +95,7 @@ def print_persistent_metrics(data_file) -> tuple[torch.Tensor, torch.Tensor]:
     )
     return loss, loss_denorm
 
-
+# Calculate test losses and persistence baseline
 def get_model_losses(model_folder, data_file):
     # Save it to a dict that can be saved (and plotted)
     persistence_loss, persistence_loss_denormalized = print_persistent_metrics(data_file)
@@ -105,6 +110,7 @@ def get_model_losses(model_folder, data_file):
 
     test_dl = torch.utils.data.DataLoader(dataset, batch_size=6, shuffle=False, pin_memory=True)
 
+    # We use the trainer for testing
     trainer = pl.trainer.Trainer(logger=False, devices=1)
     # load the models
     for model_file in tqdm(models, desc="Models", leave=True):
@@ -131,6 +137,7 @@ def plot_losses(test_losses, loss: str):
 
 
 if __name__ == "__main__":
+
     # Models that are compared should be in this folder (the ones with the lowest validation error)
     model_folder = ROOT_DIR / "checkpoints" / "comparison"
     data_file = (

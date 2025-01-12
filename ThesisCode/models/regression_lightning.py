@@ -37,6 +37,7 @@ class UNet_base(pl.LightningModule):
     def forward(self, x):
         pass
 
+    # Use of adam optimizer here for all models
     def configure_optimizers(self):
         opt = optim.Adam(self.parameters(), lr=self.hparams.learning_rate)
         scheduler = {
@@ -47,6 +48,7 @@ class UNet_base(pl.LightningModule):
         }
         return [opt], [scheduler]
 
+    # Here I could define a different loss function if I want
     def loss_func(self, y_pred, y_true):
         # reduction="mean" is average of every pixel, but I want average of image
         return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
@@ -76,14 +78,17 @@ class UNet_base(pl.LightningModule):
         self.log("MSE", loss)
         self.log("MSE_denormalized", loss_denorm)
 
-
+# Extends UNet_base and adds functionalities specific to precipitation regression tasks, such as dataset preparation and dataloaders.
 class Precip_regression_base(UNet_base):
     @staticmethod
     def add_model_specific_args(parent_parser):
         parent_parser = UNet_base.add_model_specific_args(parent_parser)
         parser = argparse.ArgumentParser(parents=[parent_parser], add_help=False)
+        # I think this is the same as the n_channels ? 
         parser.add_argument("--num_input_images", type=int, default=12)
+        # Important argument
         parser.add_argument("--num_output_images", type=int, default=6)
+        # Validation split size
         parser.add_argument("--valid_size", type=float, default=0.1)
         parser.add_argument("--use_oversampled_dataset", type=bool, default=True)
         parser.n_channels = parser.parse_args().num_input_images
@@ -97,6 +102,7 @@ class Precip_regression_base(UNet_base):
         self.train_sampler = None
         self.valid_sampler = None
 
+# Dataset loading and splitting
     def prepare_data(self):
         # train_transform = transforms.Compose([
         #     transforms.RandomHorizontalFlip()]
@@ -125,6 +131,7 @@ class Precip_regression_base(UNet_base):
 
         num_train = len(self.train_dataset)
         indices = list(range(num_train))
+        # Splits based on the validation size
         split = int(np.floor(self.hparams.valid_size * num_train))
 
         np.random.shuffle(indices)

@@ -2,12 +2,14 @@ from torch.utils.data import Dataset
 import h5py
 import numpy as np
 
-
+# Handles standard datasets for regression tasks
 class precipitation_maps_h5(Dataset):
     def __init__(self, in_file, num_input_images, num_output_images, train=True, transform=None):
         super().__init__()
 
         self.file_name = in_file
+
+        # Loads the .h5 file and retrieves the dataset dimensions
         self.n_images, self.nx, self.ny = h5py.File(self.file_name, "r")["train" if train else "test"]["images"].shape
 
         self.num_input = num_input_images
@@ -31,6 +33,8 @@ class precipitation_maps_h5(Dataset):
             self.dataset = h5py.File(self.file_name, "r", rdcc_nbytes=1024**3)["train" if self.train else "test"][
                 "images"
             ]
+
+        # For a given index, retrieves a sequence of images
         imgs = np.array(self.dataset[index : index + self.sequence_length], dtype="float32")
 
         # add transforms
@@ -45,6 +49,7 @@ class precipitation_maps_h5(Dataset):
         return self.size_dataset
 
 
+# Same as above but tailored for oversampled datasets
 class precipitation_maps_oversampled_h5(Dataset):
     def __init__(self, in_file, num_input_images, num_output_images, train=True, transform=None):
         super().__init__()
@@ -80,6 +85,7 @@ class precipitation_maps_oversampled_h5(Dataset):
         return self.samples
 
 
+# I think we don't use this anywhere
 class precipitation_maps_classification_h5(Dataset):
     def __init__(self, in_file, num_input_images, img_to_predict, train=True, transform=None):
         super().__init__()

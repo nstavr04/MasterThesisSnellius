@@ -4,7 +4,11 @@ from tqdm import tqdm
 
 from root import ROOT_DIR
 
-# I NEED TO SEE AND UNDERSTAND HOW EVERYTHING WORKS HERE
+# The intervals are 5 minutes
+# Basically each "image" corresponds to precipitation data for a 5-minute interval.
+
+# So if my input is 12 which is 12 images it means the past 60 minutes of precipitation data
+# Also if my output is 6 which is 6 images, it means the next 30 minutes of precipitation data we are trying to predict
 
 def create_dataset(input_length: int, image_ahead: int, rain_amount_thresh: float):
     """Create a dataset that has target images containing at least `rain_amount_thresh` (percent) of rain."""
@@ -90,6 +94,9 @@ def create_dataset(input_length: int, image_ahead: int, rain_amount_thresh: floa
 
 
 if __name__ == "__main__":
+
+    # Image ahead is the output images how far to output. 6 is 6 images of 5 minutes each so 30 minutes
+
     print("Creating dataset with at least 20% of rain pixel in target image")
     create_dataset(input_length=12, image_ahead=6, rain_amount_thresh=0.2)
     print("Creating dataset with at least 50% of rain pixel in target image")

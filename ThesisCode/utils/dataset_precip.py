@@ -41,6 +41,9 @@ class precipitation_maps_h5(Dataset):
         if self.transform is not None:
             imgs = self.transform(imgs)
         input_img = imgs[: self.num_input]
+
+        # The model is trained to predict only the final frame
+        # So in essence, you specify the output frames so you know after how many frames you make a prediction
         target_img = imgs[-1]
 
         return input_img, target_img

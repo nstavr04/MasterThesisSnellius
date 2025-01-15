@@ -32,5 +32,5 @@ module load NCCL/2.18.3-GCCcore-12.3.0-CUDA-12.1.1
 # uv sync
 
 # Run training pytorch lightning script
-#srun rye run python train_precip_lightning.py
+# srun uv run train_precip_lightning.py
 uv run train_precip_lightning.py

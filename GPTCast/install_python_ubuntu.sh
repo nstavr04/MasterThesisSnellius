@@ -1,3 +1,5 @@
+# I cant run sudo. I can try just loading the Python/3.12.3 module
+
 #!/bin/bash
 set -e
 

@@ -9,38 +9,35 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch import loggers
 import argparse
 from models import unet_precip_regression_lightning as unet_regr
+from models import SmaAT_Unet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
-    if hparams.model == "UNetDS_Attention":
-        net = unet_regr.UNetDS_Attention(hparams=hparams)
-    elif hparams.model == "UNet_Attention":
-        net = unet_regr.UNet_Attention(hparams=hparams)
-    elif hparams.model == "UNet":
-        net = unet_regr.UNet(hparams=hparams)
-    elif hparams.model == "UNetDS":
-        net = unet_regr.UNetDS(hparams=hparams)
+    # Since we now only support the VQ version, only check for that.
+    if hparams.model in ["SmaAT_UNet_VQ", "SmaAT-UNet-VQ"]:
+        net = SmaAT_Unet_VQ_lightning.SmaAT_Unet_VQ(hparams=hparams)
     else:
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
     default_save_path = ROOT_DIR / "lightning" / "precip_regression"
 
+    # IMPORTANT: Update the monitor to "val_total_loss" (the sum of recon + VQ loss)
     checkpoint_callback = ModelCheckpoint(
         dirpath=default_save_path / net.__class__.__name__,
-        filename=net.__class__.__name__ + "_rain_threshold_50_{epoch}-{val_loss:.6f}",
+        filename=net.__class__.__name__ + "_rain_threshold_50_{epoch}-{val_total_loss:.6f}",
         save_top_k=-1,
         verbose=False,
-        monitor="val_loss",
+        monitor="val_total_loss",
         mode="min",
     )
     lr_monitor = LearningRateMonitor()
     tb_logger = loggers.TensorBoardLogger(save_dir=default_save_path, name=net.__class__.__name__)
 
-
-    # If the model has the same val_loss for patience times (the default now is 15), the model will stop training. 
+    # Also update the early stopping monitor to "val_total_loss"
+    # If the model has the same val_loss for patience times (the default now is 15), the model will stop training.
     earlystopping_callback = EarlyStopping(
-        monitor="val_loss",
+        monitor="val_total_loss",
         mode="min",
         patience=hparams.es_patience,
     )
@@ -60,7 +57,6 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
 
     if find_batch_size_automatically:
         tuner = Tuner(trainer)
-
         # Auto-scale batch size by growing it exponentially (default)
         tuner.scale_batch_size(net, mode="binsearch")
 
@@ -76,6 +72,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
+    # Note: the base class now only supports SmaAT_UNet_VQ
     parser = unet_regr.Precip_regression_base.add_model_specific_args(parser)
 
     parser.add_argument(
@@ -94,12 +91,13 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    # args.fast_dev_run = True
-
+    # (Irrelevant comments and assignments are kept for context)
     # This probably means 12 input satellite images 
     args.n_channels = 12
     # args.gpus = 1
-    args.model = "UNetDS_Attention"
+    # SmaAT-UNet
+    # args.model = "UNetDS_Attention"
+    args.model = "SmaAT_UNet_VQ"  # Set to the VQ model
     args.lr_patience = 4
     args.es_patience = 15
     # args.val_check_interval = 0.25
@@ -110,15 +108,10 @@ if __name__ == "__main__":
     )
     # args.resume_from_checkpoint = f"lightning/precip_regression/{args.model}/UNetDS_Attention.ckpt"
 
-    # train_regression(args, find_batch_size_automatically=False)
+     # train_regression(args, find_batch_size_automatically=False)
 
-    # All the models below will be trained
-    # for m in ["UNet", "UNetDS", "UNet_Attention", "UNetDS_Attention"]:
-    #     args.model = m
-    #     print(f"Start training model: {m}")
-    #     train_regression(args, find_batch_size_automatically=False)
-
-    for m in ["UNetDS_Attention"]:
+    # The following loop is maintained even though only VQ model is used.
+    for m in ["SmaAT_UNet_VQ"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)

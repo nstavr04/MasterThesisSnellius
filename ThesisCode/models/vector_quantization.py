@@ -33,6 +33,7 @@ class VectorQuantizer(nn.Module):
             loss_dict (dict): Dictionary containing individual loss terms.
         """
         # Permute to shape (B, H, W, C) and flatten to (B*H*W, C)
+        # I think here that each pixel is a  
         x_perm = x.permute(0, 2, 3, 1).contiguous()
         flat_x = x_perm.view(-1, self.embedding_dim)
 

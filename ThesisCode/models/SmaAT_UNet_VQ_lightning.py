@@ -5,7 +5,7 @@ from models.layers import CBAM
 from models.regression_lightning import Precip_regression_base
 from vector_quantization import VectorQuantizer
 
-class UNetDS_Attention(Precip_regression_base):
+class SmaAT_Unet_VQ(Precip_regression_base):
     def __init__(self, hparams):
         super().__init__(hparams=hparams)
         self.n_channels = self.hparams.n_channels
@@ -35,6 +35,7 @@ class UNetDS_Attention(Precip_regression_base):
         
         ### VQ module at the botleneck components ###
         
+        # We need to add them as hparams at some point
         vq_num_embeddings = getattr(self.hparams, "vq_num_embeddings", 512)
         vq_commitment_cost = getattr(self.hparams, "vq_commitment_cost", 0.25)
         bottleneck_channels = 1024 // factor  # Must match the channel dimension from cbam5.

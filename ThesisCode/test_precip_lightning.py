@@ -1,5 +1,4 @@
 import json
-
 import torch
 from torch import nn
 import matplotlib.pyplot as plt
@@ -10,32 +9,6 @@ import lightning.pytorch as pl
 
 from root import ROOT_DIR
 from utils import dataset_precip, model_classes
-
-
-# I think this has been replaced with pytorch lightning
-# We use the trainer of pytorch lightning for testing
-
-# def get_model_loss(model, test_dl, loss="mse", denormalize=True, devices=1):
-#     model.eval()  # or model.freeze()?
-#     if loss.lower() == "mse":
-#         loss_func = nn.functional.mse_loss
-#     elif loss.lower() == "mae":
-#         loss_func = nn.functional.l1_loss
-#     else:
-#         raise ValueError(f"Unknown loss: {loss}")
-#     factor = 1
-#     if denormalize:
-#         factor = 47.83
-#     # go through test set
-#     with torch.no_grad():
-#         loss_model = 0.0
-#         for x, y_true in tqdm(test_dl, leave=False):
-#             x = x.to("cuda")
-#             y_pred = model(x)
-#             loss_model += loss_func(y_pred.squeeze() * factor, y_true * factor, reduction="sum") / y_true.size(0)
-#         loss_model /= len(test_dl)
-#     return np.array(loss_model)
-
 
 # Calculates baseline metrics assuming the "persistence" model (e.g., the last input frame as prediction).
 # Computes classification metrics (precision, recall, F1 score, etc.) by thresholding the outputs.
@@ -111,33 +84,45 @@ def get_model_losses(model_folder, data_file):
     test_dl = torch.utils.data.DataLoader(dataset, batch_size=6, shuffle=False, pin_memory=True)
 
     # We use the trainer for testing
-    trainer = pl.trainer.Trainer(logger=False, devices=1)
+    trainer = pl.Trainer(logger=False, devices=1)
     # load the models
     for model_file in tqdm(models, desc="Models", leave=True):
         model, model_name = model_classes.get_model_class(model_file)
         loaded_model = model.load_from_checkpoint(f"{model_folder}/{model_file}")
+        # Run testing; note that the test step now logs additional VQ losses.
         model_loss = trainer.test(model=loaded_model, dataloaders=[test_dl])
-
-        test_losses[model_name] = model_loss
+        
+        # For clarity, you might want to extract "test_total_loss" from the returned dictionary.
+        # Here we assume model_loss is a list of dictionaries.
+        if isinstance(model_loss, list) and len(model_loss) > 0:
+            # For example, use test_total_loss as the main metric.
+            total_loss = model_loss[0].get("test_total_loss", None)
+            recon_loss = model_loss[0].get("test_recon_loss", None)
+            vq_loss = model_loss[0].get("test_vq_loss", None)
+            # Save all if you like
+            test_losses[model_name] = {
+                "test_total_loss": total_loss,
+                "test_recon_loss": recon_loss,
+                "test_vq_loss": vq_loss
+            }
+        else:
+            test_losses[model_name] = model_loss
     return test_losses
 
 
-def plot_losses(test_losses, loss: str):
+def plot_losses(test_losses, loss_key: str):
     names = list(test_losses.keys())
-    values = [v[0][loss] for k, v in test_losses.items()]
+    values = [v[loss_key] for k, v in test_losses.items() if k != "Persistence"]
     plt.figure()
-    # for name in names:
     plt.bar(names, values)
     plt.xticks(rotation=45)
     plt.xlabel("Models")
-    plt.ylabel(f"{loss.upper()} on test set")
+    plt.ylabel(f"{loss_key} on test set")
     plt.title("Comparison of different models")
-
     plt.show()
 
 
 if __name__ == "__main__":
-
     # Models that are compared should be in this folder (the ones with the lowest validation error)
     model_folder = ROOT_DIR / "checkpoints" / "comparison"
     data_file = (
@@ -151,13 +136,13 @@ if __name__ == "__main__":
         # load the losses
         with open(save_file) as f_load:
             test_losses = json.load(f_load)
-
     else:
         test_losses = get_model_losses(model_folder, data_file)
         # Save losses
         with open(save_file, "w") as f_write:
             json.dump(test_losses, f_write, indent=4)
 
-    # Plot results
+    # Print and optionally plot results.
     print(test_losses)
-    # plot_losses(test_losses, "MSE")
+    # For example, plot total loss:
+    # plot_losses(test_losses, "test_total_loss")

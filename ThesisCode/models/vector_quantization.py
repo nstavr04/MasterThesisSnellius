@@ -62,7 +62,7 @@ class VectorQuantizer(nn.Module):
         commitment_loss = self.commitment_cost * F.mse_loss(x, quantized.detach())
 
         # Total VQ Loss:
-        loss = codebook_loss + commitment_loss
+        vq_loss = codebook_loss + commitment_loss
 
         # Apply the straight-through estimator.
         # During the backward pass, the gradient from quantized will be passed to x.

@@ -9,14 +9,14 @@ from lightning.pytorch.callbacks import (
 from lightning.pytorch import loggers
 import argparse
 from models import unet_precip_regression_lightning as unet_regr
-from models import SmaAT_Unet_VQ_lightning
+from models import SmaAT_UNet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
     # Since we now only support the VQ version, only check for that.
     if hparams.model in ["SmaAT_UNet_VQ", "SmaAT-UNet-VQ"]:
-        net = SmaAT_Unet_VQ_lightning.SmaAT_Unet_VQ(hparams=hparams)
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     else:
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 

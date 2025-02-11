@@ -1,11 +1,11 @@
 """Overwrites basically the unet_precip_regression_lightning.py and adds VQ from vector_quantization.py"""
 
-from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS
+from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS, OutConv
 from models.layers import CBAM
 from models.regression_lightning import Precip_regression_base
-from vector_quantization import VectorQuantizer
+from models.vector_quantization import VectorQuantizer
 
-class SmaAT_Unet_VQ(Precip_regression_base):
+class SmaAT_UNet_VQ(Precip_regression_base):
     def __init__(self, hparams):
         super().__init__(hparams=hparams)
         self.n_channels = self.hparams.n_channels
@@ -72,7 +72,7 @@ class SmaAT_Unet_VQ(Precip_regression_base):
         # VQ Bottleneck.
         # 3rd argument here is a dict of both losses separately
         # I don't use it yet but we might need it
-        x5Quantized, vq_loss, _ = self.vq(x5Att)
+        x5Quantized, vq_loss, loss_dict = self.vq(x5Att)
 
         # Decoder using quantized features.
         x = self.up1(x5Quantized, x4Att)
@@ -82,4 +82,4 @@ class SmaAT_Unet_VQ(Precip_regression_base):
         logits = self.outc(x)
 
         # Return logits and vq_loss; the training loop should combine these losses.
-        return logits, vq_loss
+        return logits, vq_loss, loss_dict

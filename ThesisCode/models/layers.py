@@ -133,6 +133,7 @@ class SpatialAttention(nn.Module):
 
 # I think only this class is used for SmaAT-UNet which uses in turn SpatialAttention, Channel Attention and Flatten.
 # The other classes I think that are not being used.
+# Used by SmaAT-UNet
 class CBAM(nn.Module):
     def __init__(self, input_channels, reduction_ratio=16, kernel_size=7):
         super().__init__()

@@ -6,7 +6,7 @@ import torch.nn as nn
 import torch.nn.functional as F
 from models.layers import DepthwiseSeparableConv
 
-
+# Used in SmaAT-UNet
 class DoubleConvDS(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
@@ -38,7 +38,7 @@ class DoubleConvDS(nn.Module):
     def forward(self, x):
         return self.double_conv(x)
 
-
+# Used in SmaAT-UNet
 class DownDS(nn.Module):
     """Downscaling with maxpool then double conv"""
 
@@ -52,7 +52,7 @@ class DownDS(nn.Module):
     def forward(self, x):
         return self.maxpool_conv(x)
 
-
+# Used in SmaAT-UNet
 class UpDS(nn.Module):
     """Upscaling then double conv"""
 
@@ -85,7 +85,7 @@ class UpDS(nn.Module):
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
-
+# Used in SmaAT-UNet
 class OutConv(nn.Module):
     def __init__(self, in_channels, out_channels):
         super().__init__()

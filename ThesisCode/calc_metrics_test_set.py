@@ -23,18 +23,28 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
         total_fn = 0
         loss: torch.Tensor = 0.0
         loss_denorm: torch.Tensor = 0.0
+        total_vq_loss = 0.0
+        total_codebook_loss = 0.0
+        total_commitment_loss = 0.0
         for x, y_true in tqdm(test_dl, leave=True):
             # Move data to device
             x = x.to(device)
             y_true = y_true.to(device)
-            y_pred = model(x)
-            # denormalize
+            # Use the new VQ model: it returns (logits, vq_loss, loss_dict)
+            logits, vq_loss, loss_dict = model(x)
+            # For computing metrics, use logits as predictions
+            y_pred = logits
+            # denormalize predictions and ground truth
             y_pred_adj = y_pred.squeeze() * 47.83
             y_true_adj = y_true.squeeze() * 47.83
 
-            # calc loss
+            # calc loss: reconstruction loss computed on logits (same as old MSE)
             loss += loss_func(y_pred.squeeze(), y_true.squeeze(), reduction="sum")
             loss_denorm += loss_func(y_pred_adj, y_true_adj, reduction="sum")
+            # accumulate VQ losses
+            total_vq_loss += vq_loss.item()
+            total_codebook_loss += loss_dict["codebook_loss"].item()
+            total_commitment_loss += loss_dict["commitment_loss"].item()
 
             # convert from mm/5min to mm/h
             y_pred_adj *= 12
@@ -52,6 +62,9 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
         mse_image = loss / len(test_dl)
         mse_denormalized_image = loss_denorm / len(test_dl)
         mse_pixel = mse_denormalized_image / torch.numel(y_true)
+        avg_vq_loss = total_vq_loss / len(test_dl)
+        avg_codebook_loss = total_codebook_loss / len(test_dl)
+        avg_commitment_loss = total_commitment_loss / len(test_dl)
 
         precision = total_tp / (total_tp + total_fp)
         recall = total_tp / (total_tp + total_fn)
@@ -74,6 +87,9 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
         csi,
         far,
         hss,
+        avg_vq_loss,
+        avg_codebook_loss,
+        avg_commitment_loss,
     )
 
 
@@ -106,10 +122,23 @@ def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
         model, model_name = model_classes.get_model_class(model_file)
         model = model.load_from_checkpoint(model_folder / model_file)
         model.eval()
+        model.to(device)
 
-        mse_image, mse_denormalized_image, mse_pixel, precision, recall, accuracy, f1, csi, far, hss = (
-            get_metrics_from_model(model, test_dl, threshold, device=device)
-        )
+        (
+            mse_image,
+            mse_denormalized_image,
+            mse_pixel,
+            precision,
+            recall,
+            accuracy,
+            f1,
+            csi,
+            far,
+            hss,
+            avg_vq_loss,
+            avg_codebook_loss,
+            avg_commitment_loss,
+        ) = get_metrics_from_model(model, test_dl, threshold, device=device)
         model_metrics[model_name] = {
             "mse": mse_image,
             "mse_denormalized_image": mse_denormalized_image,
@@ -121,6 +150,9 @@ def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
             "CSI": csi,
             "FAR": far,
             "HSS": hss,
+            "avg_vq_loss": avg_vq_loss,
+            "avg_codebook_loss": avg_codebook_loss,
+            "avg_commitment_loss": avg_commitment_loss,
         }
         print(model_name, model_metrics[model_name])
     return model_metrics

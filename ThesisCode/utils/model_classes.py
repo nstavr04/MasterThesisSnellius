@@ -1,10 +1,17 @@
 from models import unet_precip_regression_lightning as unet_regr
+from models import SmaAT_UNet_VQ_lightning
 import lightning.pytorch as pl
 
 
 def get_model_class(model_file) -> tuple[type[pl.LightningModule], str]:
     # This is for some nice plotting
-    if "UNet_Attention" in model_file:
+    # I think it's also used for checkpoint loading in testing
+
+    # Added this extra if statement
+    if "SmaAT_UNet_VQ" in model_file:
+        model_name = "SmaAT_UNet_VQ"
+        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
+    elif "UNet_Attention" in model_file:
         model_name = "UNet Attention"
         model = unet_regr.UNet_Attention
     elif "UNetDS_Attention_4kpl" in model_file:

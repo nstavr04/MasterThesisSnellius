@@ -44,7 +44,7 @@ class VectorQuantizer(nn.Module):
             - 2 * torch.matmul(flat_x, self.embedding.weight.t())
         )  # shape: (B*H*W, num_embeddings)
 
-        # For each latent vector, find the index of the closest embedding.
+        # For each latent vector, we want to find the index of the closest embedding.
         encoding_indices = torch.argmin(distances, dim=1)
         encodings = F.one_hot(encoding_indices, self.num_embeddings).type(flat_x.dtype)
 

@@ -1,5 +1,5 @@
 import lightning.pytorch as pl
-from torch import nn, optim
+from torch import nn, optim, sigmoid, abs
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from utils import dataset_precip
@@ -48,10 +48,22 @@ class UNet_base(pl.LightningModule):
         }
         return [opt], [scheduler]
 
+    # MWAE loss function as defined in GPTCast paper
+    def mwae(self, x, y):
+        sx = sigmoid(x)
+        sy = sigmoid(y)
+        return abs(sx - sy) * sx
+
     # Here I could define a different loss function if I want
+    # Now using mwae
     def loss_func(self, y_pred, y_true):
         # reduction="mean" is average of every pixel, but I want average of image
-        return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
+        # return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
+        
+        # Computes the MWAE loss elementwise, sums over all pixels in each image,
+        # then divides by the batch size (average per image).
+        return self.mwae(y_pred, y_true).sum() / y_true.size(0)
+
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -75,8 +87,8 @@ class UNet_base(pl.LightningModule):
         loss = self.loss_func(y_pred.squeeze(), y)
         factor = 47.83
         loss_denorm = self.loss_func(y_pred.squeeze() * factor, y * factor)
-        self.log("MSE", loss)
-        self.log("MSE_denormalized", loss_denorm)
+        self.log("MWAE", loss)
+        self.log("MWAE_denormalized", loss_denorm)
 
 # Extends UNet_base and adds functionalities specific to precipitation regression tasks, such as dataset preparation and dataloaders.
 class Precip_regression_base(UNet_base):

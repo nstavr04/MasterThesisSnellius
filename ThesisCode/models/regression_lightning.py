@@ -60,10 +60,10 @@ class UNet_base(pl.LightningModule):
     def mwae(self, x, y):
         sx = sigmoid(x)
         sy = sigmoid(y)
-        return ((abs(sx - sy) * sx).sum()) / y_true.size(0)
+        return ((abs(sx - sy) * sx).sum()) / y.size(0)
 
     def mse(self, x, y):
-        return nn.functional.mse_loss(x, y, reduction="sum") / y_true.size(0)
+        return nn.functional.mse_loss(x, y, reduction="sum") / y.size(0)
 
     def loss_func(self, y_pred, y_true):
         """

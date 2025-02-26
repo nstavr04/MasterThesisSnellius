@@ -1,3 +1,4 @@
+"""Calculate different test metrics. We use MSE for evaluation"""
 import torch
 from torch import nn
 
@@ -161,6 +162,7 @@ def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
 if __name__ == "__main__":
     load_metrics = False
 
+    # Calculates metrics for all models in the checkpoints/comparison folder
     model_folder = ROOT_DIR / "checkpoints" / "comparison"
     threshold = 0.5
 

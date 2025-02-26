@@ -1,3 +1,4 @@
+"""Script to create the precipitation dataset"""
 import h5py
 import numpy as np
 from tqdm import tqdm
@@ -9,6 +10,10 @@ from root import ROOT_DIR
 
 # So if my input is 12 which is 12 images it means the past 60 minutes of precipitation data
 # Also if my output is 6 which is 6 images, it means the next 30 minutes of precipitation data we are trying to predict
+
+# Links to the original dataset:
+# https://mega.nz/file/eEcCFBwD#Q0ot8XP1VXR1fLN5gYbL7LMGB7d8RtvYpCnVK9tCyFI
+# https://drive.google.com/file/d/1L0kRYlqnZGVsTLjeHUzKaWTiCUSlf22j/view?usp=sharing
 
 def create_dataset(input_length: int, image_ahead: int, rain_amount_thresh: float):
     """Create a dataset that has target images containing at least `rain_amount_thresh` (percent) of rain."""

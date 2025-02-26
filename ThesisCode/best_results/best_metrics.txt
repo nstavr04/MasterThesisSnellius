@@ -1,0 +1,21 @@
+mse_pixel:
+
+    Persistence model:
+    0.0248
+
+    SmaAT_UNet_VQ_MWAE:
+    codebook 32, comm 0.75: 
+
+    SmaAT_UNet_VQ_MSE:
+    codebook 32, comm 0.75: 0.011502458713948727
+    codebook 512, comm 0.25: 0.011932343244552612
+
+    SmaAT_UNet_MWAE:
+    0.011572523042559624
+
+    SmaAT_UNet:
+    0.012519785203039646
+    (paper one) - 0.0122
+
+    UNet:
+    0.0122

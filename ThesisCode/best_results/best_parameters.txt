@@ -1,4 +1,4 @@
-For SmaAT_UNet_VQ_MSE:
+        For SmaAT_UNet_VQ_MSE:
     codebook-size: 32
     commitment-cost: 0.75
 

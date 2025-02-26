@@ -27,20 +27,30 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     else:
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
+    # Create a custom model name based on the model string and, if VQ is used, the hyperparameters.
+    if hparams.model in ["SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MWAE"]:
+        custom_model_name = (
+            f"{hparams.model}-num{hparams.vq_num_embeddings}-commit{hparams.vq_commitment_cost}"
+        )
+    else:
+        custom_model_name = hparams.model
+
     default_save_path = ROOT_DIR / "lightning" / "precip_regression"
 
     # IMPORTANT: Update the monitor to "val_total_loss" (the sum of recon + VQ loss)
     checkpoint_callback = ModelCheckpoint(
-        dirpath=default_save_path / net.__class__.__name__,
-        filename=net.__class__.__name__ + "_rain_threshold_50_{epoch}-{val_total_loss:.6f}",
+        dirpath=default_save_path / custom_model_name,
+        filename=custom_model_name + "_rain_threshold_50_{epoch}-{val_total_loss:.6f}",
         save_top_k=-1,
         verbose=False,
         monitor="val_total_loss",
         mode="min",
     )
     lr_monitor = LearningRateMonitor()
-    tb_logger = loggers.TensorBoardLogger(save_dir=default_save_path, name=net.__class__.__name__)
-
+    tb_logger = loggers.TensorBoardLogger(
+        save_dir=default_save_path, name=custom_model_name
+    )
+    
     # Also update the early stopping monitor to "val_total_loss"
     # If the model has the same val_loss for patience times (the default now is 15), the model will stop training.
     earlystopping_callback = EarlyStopping(

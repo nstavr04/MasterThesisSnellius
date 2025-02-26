@@ -14,9 +14,16 @@ from lightning.pytorch.tuner import Tuner
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
-    # Since we now only support the VQ version, only check for that.
-    if hparams.model in ["SmaAT_UNet_VQ", "SmaAT-UNet-VQ"]:
+    if hparams.model in ["SmaAT_UNet_VQ_MSE"]:
+        hparams.vqmodel_recon_loss_type = "mse"
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    elif hparams.model in ["SmaAT_UNet_VQ_MWAE"]:
+        hparams.vqmodel_recon_loss_type = "mwae"
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    elif hparams.model in ["SmaAT_UNet"]:
+        net = unet_regr.UNet_Attention(hparams=hparams)
+    elif hparams.model in ["UNet"]:
+        net = unet_regr.UNet(hparams=hparams)
     else:
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
@@ -64,7 +71,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     # https://lightning.ai/docs/pytorch/stable/advanced/speed.html#low-precision-matrix-multiplication
     
     # I can try it sometime. Low means fast but less precision, high means high precision but slower.
-    # torch.set_float32_matmul_precision('medium')
+    torch.set_float32_matmul_precision('medium')
 
     trainer.fit(model=net, ckpt_path=hparams.resume_from_checkpoint)
 
@@ -72,7 +79,6 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
 
-    # Note: the base class now only supports SmaAT_UNet_VQ
     parser = unet_regr.Precip_regression_base.add_model_specific_args(parser)
 
     parser.add_argument(
@@ -82,7 +88,9 @@ if __name__ == "__main__":
     )
 
     # default is 16
-    parser.add_argument("--batch_size", type=int, default=8)
+    # I had 8
+    parser.add_argument("--batch_size", type=int, default=16)
+
     parser.add_argument("--learning_rate", type=float, default=0.001)
     parser.add_argument("--epochs", type=int, default=200)
     parser.add_argument("--fast_dev_run", type=bool, default=False)
@@ -95,9 +103,7 @@ if __name__ == "__main__":
     # This probably means 12 input satellite images 
     args.n_channels = 12
     # args.gpus = 1
-    # SmaAT-UNet
-    # args.model = "UNetDS_Attention"
-    args.model = "SmaAT_UNet_VQ"  # Set to the VQ model
+
     args.lr_patience = 4
     args.es_patience = 15
     # args.val_check_interval = 0.25
@@ -110,8 +116,12 @@ if __name__ == "__main__":
 
      # train_regression(args, find_batch_size_automatically=False)
 
-    # The following loop is maintained even though only VQ model is used.
-    for m in ["SmaAT_UNet_VQ"]:
+    # Pick which models we want to train
+    # args.model = "UNet"
+    # args.model = "SmaAT_UNet"
+    # args.model = "SmaAT_UNet_VQ_MWAE"
+    # args.model = "SmaAT_UNet_VQ_MSE"
+    for m in ["SmaAT_UNet_VQ_MSE"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)

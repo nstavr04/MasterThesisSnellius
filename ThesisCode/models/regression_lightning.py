@@ -7,7 +7,7 @@ import argparse
 import numpy as np
 
 ###############################################################################
-# Base Class for SmaAT-UNet with VQ (only VQ version is supported now)
+# Base Class for SmaAT_UNet and SmaAT_UNet_VQ
 ###############################################################################
 class UNet_base(pl.LightningModule):
     @staticmethod
@@ -17,8 +17,8 @@ class UNet_base(pl.LightningModule):
         parser.add_argument(
             "--model",
             type=str,
-            default="SmaAT_UNet_VQ",
-            choices=["SmaAT_UNet_VQ"],
+            default="SmaAT_UNet_VQ_MSE",
+            choices=["SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MWAE", "SmaAT_UNet", "UNet"],
         )
         # Basic model arguments
         parser.add_argument("--n_channels", type=int, default=12)
@@ -30,6 +30,10 @@ class UNet_base(pl.LightningModule):
         # VQ-specific arguments:
         parser.add_argument("--vq_num_embeddings", type=int, default=512)
         parser.add_argument("--vq_commitment_cost", type=float, default=0.25)
+
+        # Loss type for the VQ model variations
+        parser.add_argument("--vqmodel_recon_loss_type", type=str, default="mse", choices=["mse", "mwae"])
+
         return parser
 
     def __init__(self, hparams):
@@ -51,12 +55,25 @@ class UNet_base(pl.LightningModule):
         }
         return [opt], [scheduler]
 
+    # MWAE loss function as defined in GPTCast paper
+    # We use it only for the recon loss
+    def mwae(self, x, y):
+        sx = sigmoid(x)
+        sy = sigmoid(y)
+        return ((abs(sx - sy) * sx).sum()) / y_true.size(0)
+
+    def mse(self, x, y):
+        return nn.functional.mse_loss(x, y, reduction="sum") / y_true.size(0)
+
     def loss_func(self, y_pred, y_true):
         """
         Reconstruction (or regression) loss.
-        We use the mean squared error averaged per image.
+        We use the mean squared error averaged per image or the MWAE loss.
         """
-        return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
+        if self.hparams.vqmodel_recon_loss_type == 'mwae':
+            return self.mwae(y_pred, y_true)
+        else:
+            return self.mse(y_pred, y_true)
 
     def training_step(self, batch, batch_idx):
         x, y = batch

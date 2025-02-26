@@ -70,7 +70,7 @@ class UNet_base(pl.LightningModule):
         if self.hparams.vqmodel_recon_loss_type == 'mwae':
             return self.mwae(y_pred, y_true).sum() / y_true.size(0)
         else:
-            return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y.size(0)
+            return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
 
     def training_step(self, batch, batch_idx):
         x, y = batch

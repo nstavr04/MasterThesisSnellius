@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MWAE"
     # args.model = "SmaAT_UNet_VQ_MSE"
-    for m in ["SmaAT_UNet_VQ_MSE"]:
+    for m in ["SmaAT_UNet_VQ_MWAE"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)

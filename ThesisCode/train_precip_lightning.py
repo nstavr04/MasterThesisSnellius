@@ -8,6 +8,7 @@ from lightning.pytorch.callbacks import (
 )
 from lightning.pytorch import loggers
 import argparse
+import numpy as np
 from models import unet_precip_regression_lightning as unet_regr
 from models import SmaAT_UNet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
@@ -21,10 +22,13 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
     default_save_path = ROOT_DIR / "lightning" / "precip_regression"
+    
+    # Use the provided save_folder if available:
+    folder_name = getattr(hparams, "save_folder", net.__class__.__name__)
 
     # IMPORTANT: Update the monitor to "val_total_loss" (the sum of recon + VQ loss)
     checkpoint_callback = ModelCheckpoint(
-        dirpath=default_save_path / net.__class__.__name__,
+        dirpath=default_save_path / folder_name,
         filename=net.__class__.__name__ + "_rain_threshold_50_{epoch}-{val_total_loss:.6f}",
         save_top_k=-1,
         verbose=False,
@@ -110,8 +114,19 @@ if __name__ == "__main__":
 
      # train_regression(args, find_batch_size_automatically=False)
 
-    # The following loop is maintained even though only VQ model is used.
-    for m in ["SmaAT_UNet_VQ"]:
-        args.model = m
-        print(f"Start training model: {m}")
-        train_regression(args, find_batch_size_automatically=False)
+    # Define the hyperparameter ranges:
+    # For commitment cost, we use 5 values in logspace between 1e-2 and 1 (since log(0) is undefined)
+    commitment_cost_values = np.linspace(0, 1, num=5) # e.g. [0, 0.25, 0.5, 0.75, 1.0]
+    num_embeddings_values = [32, 64, 128, 256, 512]
+
+    for num_emb in num_embeddings_values:
+        for comm_cost in commitment_cost_values:
+            # Update hyperparameters:
+            args.vq_num_embeddings = num_emb
+            args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
+            args.model = "SmaAT_UNet_VQ"
+            # Define a folder name that reflects the hyperparameter settings:
+            args.save_folder = f"SmaAT-UNet-VQ-num{num_emb}-commitment{comm_cost:.4f}"
+            
+            print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
+            train_regression(args, find_batch_size_automatically=False)

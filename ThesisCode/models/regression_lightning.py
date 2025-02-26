@@ -1,5 +1,5 @@
 import lightning.pytorch as pl
-from torch import nn, optim
+from torch import nn, optim, sigmoid, abs
 from torch.utils.data import DataLoader
 from torch.utils.data.sampler import SubsetRandomSampler
 from utils import dataset_precip

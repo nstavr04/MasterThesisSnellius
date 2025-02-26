@@ -50,7 +50,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     tb_logger = loggers.TensorBoardLogger(
         save_dir=default_save_path, name=custom_model_name
     )
-    
+
     # Also update the early stopping monitor to "val_total_loss"
     # If the model has the same val_loss for patience times (the default now is 15), the model will stop training.
     earlystopping_callback = EarlyStopping(
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MWAE"
     # args.model = "SmaAT_UNet_VQ_MSE"
-    for m in ["SmaAT_UNet_VQ_MWAE"]:
+    for m in ["SmaAT_UNet_VQ_MSE"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)

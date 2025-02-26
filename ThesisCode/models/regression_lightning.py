@@ -60,10 +60,7 @@ class UNet_base(pl.LightningModule):
     def mwae(self, x, y):
         sx = sigmoid(x)
         sy = sigmoid(y)
-        return ((abs(sx - sy) * sx).sum()) / y.size(0)
-
-    def mse(self, x, y):
-        return nn.functional.mse_loss(x, y, reduction="sum") / y.size(0)
+        return abs(sx - sy) * sx
 
     def loss_func(self, y_pred, y_true):
         """
@@ -71,9 +68,9 @@ class UNet_base(pl.LightningModule):
         We use the mean squared error averaged per image or the MWAE loss.
         """
         if self.hparams.vqmodel_recon_loss_type == 'mwae':
-            return self.mwae(y_pred, y_true)
+            return self.mwae(y_pred, y_true).sum() / y_true.size(0)
         else:
-            return self.mse(y_pred, y_true)
+            return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y.size(0)
 
     def training_step(self, batch, batch_idx):
         x, y = batch

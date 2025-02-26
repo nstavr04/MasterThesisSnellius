@@ -31,8 +31,18 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             # Move data to device
             x = x.to(device)
             y_true = y_true.to(device)
-            # Use the new VQ model: it returns (logits, vq_loss, loss_dict)
-            logits, vq_loss, loss_dict = model(x)
+
+            # if the model returns a tuple of 3, then unpack VQ losses
+            # if its the SmaAT-UNet or UNet, we just set the VQ related losses to 0
+            output = model(x)       
+            if isinstance(output, tuple) and len(output) == 3:
+                logits, vq_loss, loss_dict = output
+            else:
+                logits = output
+                vq_loss = torch.tensor(0.0, device=device)
+                loss_dict = {"codebook_loss": torch.tensor(0.0, device=device), 
+                             "commitment_loss": torch.tensor(0.0, device=device)}
+            
             # For computing metrics, use logits as predictions
             y_pred = logits
             # denormalize predictions and ground truth
@@ -42,7 +52,7 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             # calc loss: reconstruction loss computed on logits (same as old MSE)
             loss += loss_func(y_pred.squeeze(), y_true.squeeze(), reduction="sum")
             loss_denorm += loss_func(y_pred_adj, y_true_adj, reduction="sum")
-            # accumulate VQ losses
+            # accumulate VQ losses only if available (they'll be zero otherwise)
             total_vq_loss += vq_loss.item()
             total_codebook_loss += loss_dict["codebook_loss"].item()
             total_commitment_loss += loss_dict["commitment_loss"].item()
@@ -54,12 +64,15 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             y_pred_mask = y_pred_adj > threshold
             y_true_mask = y_true_adj > threshold
 
-            tn, fp, fn, tp = np.bincount(y_true_mask.cpu().view(-1) * 2 + y_pred_mask.cpu().view(-1), minlength=4)
+            tn, fp, fn, tp = np.bincount(
+                y_true_mask.cpu().view(-1) * 2 + y_pred_mask.cpu().view(-1), minlength=4
+            )
             total_tp += tp
             total_fp += fp
             total_tn += tn
             total_fn += fn
             # get metrics for sample
+
         mse_image = loss / len(test_dl)
         mse_denormalized_image = loss_denorm / len(test_dl)
         mse_pixel = mse_denormalized_image / torch.numel(y_true)

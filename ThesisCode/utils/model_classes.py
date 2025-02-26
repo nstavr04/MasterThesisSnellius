@@ -2,33 +2,18 @@ from models import unet_precip_regression_lightning as unet_regr
 from models import SmaAT_UNet_VQ_lightning
 import lightning.pytorch as pl
 
-
+# Used in the plotting and for the comparison etc. in testing
 def get_model_class(model_file) -> tuple[type[pl.LightningModule], str]:
-    # This is for some nice plotting
-    # I think it's also used for checkpoint loading in testing
-
-    # Added this extra if statement
-    if "SmaAT_UNet_VQ" in model_file:
-        model_name = "SmaAT_UNet_VQ"
+    
+    if "SmaAT_UNet_VQ_MSE" in model_file:
+        model_name = "SmaAT_UNet_VQ_MSE     "
         model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
-    elif "UNet_Attention" in model_file:
-        model_name = "UNet Attention"
-        model = unet_regr.UNet_Attention
-    elif "UNetDS_Attention_4kpl" in model_file:
-        model_name = "UNetDS Attention with 4kpl"
+    elif "SmaAT_UNet_VQ_MWAE" in model_file:
+        model_name = "SmaAT_UNet_VQ_MWAE"
+        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
+    elif "SmaAT_UNet" in model_file:
+        model_name = "SmaAT_UNet"
         model = unet_regr.UNetDS_Attention
-    elif "UNetDS_Attention_1kpl" in model_file:
-        model_name = "UNetDS Attention with 1kpl"
-        model = unet_regr.UNetDS_Attention
-    elif "UNetDS_Attention_4CBAMs" in model_file:
-        model_name = "UNetDS Attention 4CBAMs"
-        model = unet_regr.UNetDS_Attention_4CBAMs
-    elif "UNetDS_Attention" in model_file:
-        model_name = "SmaAt-UNet"
-        model = unet_regr.UNetDS_Attention
-    elif "UNetDS" in model_file:
-        model_name = "UNetDS"
-        model = unet_regr.UNetDS
     elif "UNet" in model_file:
         model_name = "UNet"
         model = unet_regr.UNet

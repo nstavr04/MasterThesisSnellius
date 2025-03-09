@@ -135,27 +135,27 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MWAE"
     # args.model = "SmaAT_UNet_VQ_MSE"
-    for m in ["SmaAT_UNet_VQ_MWAE"]:
-        args.model = m
-        print(f"Start training model: {m}")
-        train_regression(args, find_batch_size_automatically=False)
+    # for m in ["SmaAT_UNet_VQ_MSE"]:
+    #     args.model = m
+    #     print(f"Start training model: {m}")
+    #     train_regression(args, find_batch_size_automatically=False)
 
     # Use this if we want hyperparameter tuning on VQ models
 
     # Define the hyperparameter ranges:
     # For commitment cost, we use 5 values in logspace between 1e-2 and 1 (since log(0) is undefined)
 
-    # commitment_cost_values = np.linspace(0, 1, num=5) # e.g. [0, 0.25, 0.5, 0.75, 1.0]
-    # num_embeddings_values = [32, 64, 128, 256, 512]
+    commitment_cost_values = np.linspace(0, 1, num=5) # e.g. [0, 0.25, 0.5, 0.75, 1.0]
+    num_embeddings_values = [32, 64, 128, 256, 512]
 
-    # for num_emb in num_embeddings_values:
-    #     for comm_cost in commitment_cost_values:
-    #         # Update hyperparameters:
-    #         args.vq_num_embeddings = num_emb
-    #         args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
-    #         args.model = "SmaAT_UNet_VQ"
-    #         # Define a folder name that reflects the hyperparameter settings:
-    #         args.save_folder = f"SmaAT-UNet-VQ-num{num_emb}-commitment{comm_cost:.4f}"
+    for num_emb in num_embeddings_values:
+        for comm_cost in commitment_cost_values:
+            # Update hyperparameters:
+            args.vq_num_embeddings = num_emb
+            args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
+            args.model = "SmaAT_UNet_VQ_MSE"
+            # Define a folder name that reflects the hyperparameter settings:
+            args.save_folder = f"SmaAT-UNet-VQ-MSE-num{num_emb}-commitment{comm_cost:.4f}"
             
-    #         print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
-    #         train_regression(args, find_batch_size_automatically=False)
+            print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
+            train_regression(args, find_batch_size_automatically=False)

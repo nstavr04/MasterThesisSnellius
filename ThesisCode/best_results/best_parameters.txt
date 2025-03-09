@@ -1,10 +1,6 @@
-        For SmaAT_UNet_VQ_MSE:
+For SmaAT_UNet_VQ_MSE:
     codebook-size: 32
     commitment-cost: 0.75
-
-For SmaAT_UNet_VQ_MWAE:
-    codebook-size:
-    commitment-cost:
 
 Parameter size:
    | Name  | Type            | Params
@@ -30,3 +26,27 @@ Parameter size:
 0         Non-trainable params
 4.0 M     Total params
 16.200    Total estimated model params size (MB)
+
+Parameters of SmaAT_UNet:
+   | Name  | Type         | Params
+----------------------------------------
+0  | inc   | DoubleConvDS | 11.6 K
+1  | cbam1 | CBAM         | 680   
+2  | down1 | DownDS       | 53.8 K
+3  | cbam2 | CBAM         | 2.3 K 
+4  | down2 | DownDS       | 205 K 
+5  | cbam3 | CBAM         | 8.6 K 
+6  | down3 | DownDS       | 804 K 
+7  | cbam4 | CBAM         | 33.4 K
+8  | down4 | DownDS       | 1.1 M 
+9  | cbam5 | CBAM         | 33.4 K
+10 | up1   | UpDS         | 1.3 M 
+11 | up2   | UpDS         | 344 K 
+12 | up3   | UpDS         | 90.2 K
+13 | up4   | UpDS         | 28.8 K
+14 | outc  | OutConv      | 65    
+----------------------------------------
+4.0 M     Trainable params
+0         Non-trainable params
+4.0 M     Total params
+16.134    Total estimated model params size (MB)

@@ -11,6 +11,7 @@ import argparse
 from models import unet_precip_regression_lightning as unet_regr
 from models import SmaAT_UNet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
+import numpy as np
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
@@ -155,6 +156,7 @@ if __name__ == "__main__":
             args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
             args.model = "SmaAT_UNet_VQ_MSE"
             # Define a folder name that reflects the hyperparameter settings:
+            # I think this does nothing
             args.save_folder = f"SmaAT-UNet-VQ-MSE-num{num_emb}-commitment{comm_cost:.4f}"
             
             print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")

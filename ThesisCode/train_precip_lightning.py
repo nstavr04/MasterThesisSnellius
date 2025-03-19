@@ -12,6 +12,7 @@ from models import unet_precip_regression_lightning as unet_regr
 from models import SmaAT_UNet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
 import numpy as np
+import torch
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
@@ -82,7 +83,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     # https://lightning.ai/docs/pytorch/stable/advanced/speed.html#low-precision-matrix-multiplication
     
     # I can try it sometime. Low means fast but less precision, high means high precision but slower.
-    # torch.set_float32_matmul_precision('medium')
+    torch.set_float32_matmul_precision('high')
 
     trainer.fit(model=net, ckpt_path=hparams.resume_from_checkpoint)
 

@@ -11,6 +11,7 @@ class SmaAT_UNet_VQ(Precip_regression_base):
         self.n_channels = self.hparams.n_channels
 
         # I think this is set as 1 in regression_lightning at UNet_Base model because we have regression
+        # We set to 5 for CE because we have buckets
         self.n_classes = self.hparams.n_classes
         self.bilinear = self.hparams.bilinear
         reduction_ratio = self.hparams.reduction_ratio

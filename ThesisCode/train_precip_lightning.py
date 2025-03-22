@@ -16,7 +16,11 @@ import torch
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
-    if hparams.model in ["SmaAT_UNet_VQ_MSE"]:
+    if hparams.model in ["SmaAT_UNet_VQ_CE"]:
+        hparams.vqmodel_recon_loss_type = "ce"
+        hparams.n_classes = 5
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    elif hparams.model in ["SmaAT_UNet_VQ_MSE"]:
         hparams.vqmodel_recon_loss_type = "mse"
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     elif hparams.model in ["SmaAT_UNet_VQ_MWAE"]:
@@ -109,6 +113,12 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
+    # Change the class num accordingly to ce or mse loss
+    if args.vqmodel_recon_loss_type == 'ce':
+        args.n_classes = 5  # number of buckets for CE loss
+    else:
+        args.n_classes = 1  # continuous output for MSE or MWAE
+
     # (Irrelevant comments and assignments are kept for context)
     # This probably means 12 input satellite images 
     args.n_channels = 12
@@ -135,7 +145,8 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MWAE"
     # args.model = "SmaAT_UNet_VQ_MSE"
-    for m in ["SmaAT_UNet_VQ_MSE"]:
+
+    for m in ["SmaAT_UNet_VQ_CE"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)
@@ -153,10 +164,10 @@ if __name__ == "__main__":
     #         # Update hyperparameters:
     #         args.vq_num_embeddings = num_emb
     #         args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
-    #         args.model = "SmaAT_UNet_VQ_MSE"
+    #         args.model = "SmaAT_UNet_VQ_MWAE"
     #         # Define a folder name that reflects the hyperparameter settings:
     #         # I think this does nothing
-    #         args.save_folder = f"SmaAT-UNet-VQ-MSE-num{num_emb}-commitment{comm_cost:.4f}"
+    #         args.save_folder = f"SmaAT-UNet-VQ-MWAE-num{num_emb}-commitment{comm_cost:.4f}"
             
     #         print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
     #         train_regression(args, find_batch_size_automatically=False)

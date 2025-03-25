@@ -63,7 +63,7 @@ class UNet_base(pl.LightningModule):
         - y_pred: logits of shape [B, num_buckets, H, W]
         - y_true: continuous targets of shape [B, 1, H, W]
         Hard-coded bucket settings are used here. """
-        # Set bucket boundaries based on your histogram data.
+        # Set bucket boundaries based on the histogram data on view_dataset.ipynb.
         # These boundaries are chosen so that:
         # - Class 0: values < 0.0094
         # - Class 1: 0.0094 ≤ values < 0.0189
@@ -71,9 +71,11 @@ class UNet_base(pl.LightningModule):
         # - Class 3: 0.0283 ≤ values < 0.0471
         # - Class 4: values ≥ 0.0471
         bucket_boundaries = torch.tensor([0.0094, 0.0189, 0.0283, 0.0471], device=y_true.device)
+        
         # Bucket means, roughly chosen as midpoints:
         bucket_means = torch.tensor([0.005, 0.01415, 0.0236, 0.0377, 0.05185], device=y_true.device)
-        # You can start with equal weights:
+        
+        # I've set the weights again accordingly to the view_dataset.ipynb distributions
         bucket_weights = torch.tensor([0.51, 0.72, 0.82, 0.88, 0.96], device=y_true.device)
 
         # Convert continuous target to bucket indices.

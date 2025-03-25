@@ -18,6 +18,7 @@ import torch
 def train_regression(hparams, find_batch_size_automatically: bool = False):
     if hparams.model in ["SmaAT_UNet_VQ_CE"]:
         hparams.vqmodel_recon_loss_type = "ce"
+        # Set the number of buckets/classes here
         hparams.n_classes = 5
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     elif hparams.model in ["SmaAT_UNet_VQ_MSE"]:

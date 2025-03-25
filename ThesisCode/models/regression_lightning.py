@@ -65,18 +65,52 @@ class UNet_base(pl.LightningModule):
         Hard-coded bucket settings are used here. """
         # Set bucket boundaries based on the histogram data on view_dataset.ipynb.
         # These boundaries are chosen so that:
-        # - Class 0: values < 0.0094
-        # - Class 1: 0.0094 ≤ values < 0.0189
-        # - Class 2: 0.0189 ≤ values < 0.0283
-        # - Class 3: 0.0283 ≤ values < 0.0471
-        # - Class 4: values ≥ 0.0471
-        bucket_boundaries = torch.tensor([0.0094, 0.0189, 0.0283, 0.0471], device=y_true.device)
-        
-        # Bucket means, roughly chosen as midpoints:
-        bucket_means = torch.tensor([0.005, 0.01415, 0.0236, 0.0377, 0.05185], device=y_true.device)
-        
-        # I've set the weights again accordingly to the view_dataset.ipynb distributions
-        bucket_weights = torch.tensor([0.51, 0.72, 0.82, 0.88, 0.96], device=y_true.device)
+        # - Class 0: values < 0.00333
+        # - Class 1: 0.00333 ≤ values < 0.00667
+        # - Class 2: 0.00667 ≤ values < 0.01000
+        # - Class 3: 0.01000 ≤ values < 0.01333
+        # - Class 4: 0.01333 ≤ values < 0.01667
+        # - Class 5: 0.01667 ≤ values < 0.02000
+        # - Class 6: 0.02000 ≤ values < 0.02333
+        # - Class 7: 0.02333 ≤ values < 0.02667
+        # - Class 8: 0.02667 ≤ values < 0.03000
+        # - Class 9: 0.03000 ≤ values < 0.03333
+        # - Class 10: 0.03333 ≤ values < 0.03667
+        # - Class 11: 0.03667 ≤ values < 0.04000
+        # - Class 12: 0.04000 ≤ values < 0.04333
+        # - Class 13: 0.04333 ≤ values < 0.04667
+        # - Class 14: values ≥ 0.04667
+
+        # Bin edges (14 values define 15 buckets)
+        bucket_boundaries = torch.tensor([
+            0.00333, 0.00667, 0.01000, 0.01333, 0.01667, 0.02000, 0.02333,
+            0.02667, 0.03000, 0.03333, 0.03667, 0.04000, 0.04333, 0.04667
+        ], device=y_true.device)
+
+        # Midpoint means of buckets
+        bucket_means = torch.tensor([
+            0.00167, 0.00500, 0.00833, 0.01167, 0.01500, 0.01833, 0.02167,
+            0.02500, 0.02833, 0.03167, 0.03500, 0.03833, 0.04167, 0.04500, 0.04833
+        ], device=y_true.device)
+
+        # Weights (inverse frequency approx., can be tuned further)
+        bucket_weights = torch.tensor([
+            0.5107,
+            0.6014,
+            0.6270,
+            0.6295,
+            0.6310,
+            0.6359,
+            0.6472,
+            0.6667,
+            0.6901,
+            0.7298,
+            0.7823,
+            0.8428,
+            0.9084,
+            0.9617,
+            1.0000
+        ], device=y_true.device)
 
         # Convert continuous target to bucket indices.
         # Assume y_true shape is [B, 1, H, W]; squeeze out the channel dimension.

@@ -19,7 +19,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     if hparams.model in ["SmaAT_UNet_VQ_CE"]:
         hparams.vqmodel_recon_loss_type = "ce"
         # Set the number of buckets/classes here
-        hparams.n_classes = 5
+        hparams.n_classes = 15
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     elif hparams.model in ["SmaAT_UNet_VQ_MSE"]:
         hparams.vqmodel_recon_loss_type = "mse"
@@ -116,7 +116,7 @@ if __name__ == "__main__":
 
     # Change the class num accordingly to ce or mse loss
     if args.vqmodel_recon_loss_type == 'ce':
-        args.n_classes = 5  # number of buckets for CE loss
+        args.n_classes = 15  # number of buckets for CE loss
     else:
         args.n_classes = 1  # continuous output for MSE or MWAE
 

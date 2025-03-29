@@ -45,10 +45,8 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             # If logits has more than one channel, assume CE branch and compute continuous prediction.
             if logits.ndim >= 2 and logits.shape[1] > 1:
                 # Define bucket means as in ce_recon_loss
-                bucket_means = torch.tensor([
-                    0.00167, 0.00500, 0.00833, 0.01167, 0.01500, 0.01833, 0.02167,
-                    0.02500, 0.02833, 0.03167, 0.03500, 0.03833, 0.04167, 0.04500, 0.04833
-                ], device=device)
+                bucket_means = buckets.get_bucket_means(device=logits.device)
+
                 # Compute softmax over bucket dimension and derive continuous prediction
                 p = torch.softmax(logits, dim=1)
                 y_pred_cont = torch.sum(p * bucket_means.view(1, -1, 1, 1), dim=1)

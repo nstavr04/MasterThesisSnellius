@@ -26,6 +26,8 @@ def get_bucket_weights(device=None):
     Returns the bucket weights tensor.
     These weights can be used to balance the loss contribution from each bucket.
     """
+    # These go logarithmically inverse
+    # The same thing is done in the RainAI paper as well
     return torch.tensor([
         0.5107,
         0.6014,

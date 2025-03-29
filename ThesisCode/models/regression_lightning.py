@@ -6,7 +6,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from utils import dataset_precip
 import argparse
 import numpy as np
-import bucket
+from utils.buckets import get_bucket_boundaries, get_bucket_means, get_bucket_weights
 
 ###############################################################################
 # Base Class for SmaAT_UNet and SmaAT_UNet_VQ
@@ -83,13 +83,13 @@ class UNet_base(pl.LightningModule):
         # - Class 14: values ≥ 0.04667
 
         # Bin edges (14 values define 15 buckets)
-        bucket_boundaries = buckets.bucket_boundaries(device=y_true.device)
+        bucket_boundaries = get_bucket_boundaries(device=y_true.device)
     
         # Midpoint means of buckets
-        bucket_means = buckets.get_bucket_means(device=y_true.device)
+        bucket_means = get_bucket_means(device=y_true.device)
 
         # Weights (inverse frequency approx., can be tuned further)
-        bucket_weights = buckets.bucket_weights(device=y_true.device)
+        bucket_weights = get_bucket_weights(device=y_true.device)
 
         # Convert continuous target to bucket indices.
         # Assume y_true shape is [B, 1, H, W]; squeeze out the channel dimension.

@@ -10,7 +10,7 @@ from tqdm import tqdm
 import os
 import numpy as np
 import json
-
+from utils.buckets import get_bucket_means
 
 def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
     device = torch.device(device)
@@ -45,7 +45,7 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             # If logits has more than one channel, assume CE branch and compute continuous prediction.
             if logits.ndim >= 2 and logits.shape[1] > 1:
                 # Define bucket means as in ce_recon_loss
-                bucket_means = buckets.get_bucket_means(device=logits.device)
+                bucket_means = get_bucket_means(device=logits.device)
 
                 # Compute softmax over bucket dimension and derive continuous prediction
                 p = torch.softmax(logits, dim=1)

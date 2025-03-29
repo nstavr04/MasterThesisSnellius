@@ -35,7 +35,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
     # Create a custom model name based on the model string and, if VQ is used, the hyperparameters.
-    if hparams.model in ["SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MWAE"]:
+    if hparams.model in ["SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MWAE", "SmaAT_UNet_VQ_CE"]:
         custom_model_name = (
             f"{hparams.model}-num{hparams.vq_num_embeddings}-commit{hparams.vq_commitment_cost}"
         )
@@ -107,7 +107,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=8)
 
     parser.add_argument("--learning_rate", type=float, default=0.001)
-    parser.add_argument("--epochs", type=int, default=200)
+    parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument("--fast_dev_run", type=bool, default=False)
     parser.add_argument("--resume_from_checkpoint", type=str, default=None)
     parser.add_argument("--val_check_interval", type=float, default=None)
@@ -121,7 +121,7 @@ if __name__ == "__main__":
         args.n_classes = 1  # continuous output for MSE or MWAE
 
     # (Irrelevant comments and assignments are kept for context)
-    # This probably means 12 input satellite images 
+    # This means 12 input satellite images 
     args.n_channels = 12
     # args.gpus = 1
 
@@ -135,7 +135,7 @@ if __name__ == "__main__":
     )
     # args.resume_from_checkpoint = f"lightning/precip_regression/{args.model}/UNetDS_Attention.ckpt"
 
-     # train_regression(args, find_batch_size_automatically=False)
+    # train_regression(args, find_batch_size_automatically=False)
 
     # I can change these 2 if I want
     args.vq_num_embeddings = 32
@@ -146,6 +146,7 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MWAE"
     # args.model = "SmaAT_UNet_VQ_MSE"
+    # args.model = "SmaAT_UNet_VQ_CE"
 
     for m in ["SmaAT_UNet_VQ_CE"]:
         args.model = m

@@ -8,6 +8,9 @@ def get_model_class(model_file) -> tuple[type[pl.LightningModule], str]:
     if "SmaAT_UNet_VQ_MSE" in model_file:
         model_name = "SmaAT_UNet_VQ_MSE"
         model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
+    elif "SmaAT_UNet_VQ_CE" in model_file:
+        model_name = "SmaAT_UNet_VQ_CE"
+        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
     elif "SmaAT_UNet_VQ_MWAE" in model_file:
         model_name = "SmaAT_UNet_VQ_MWAE"
         model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ

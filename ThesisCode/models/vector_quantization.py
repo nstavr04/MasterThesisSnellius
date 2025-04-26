@@ -32,10 +32,13 @@ class VectorQuantizer(nn.Module):
             loss (Tensor): Sum of codebook loss and commitment loss.
             loss_dict (dict): Dictionary containing individual loss terms.
         """
+
         # Permute to shape (B, H, W, C) and flatten to (B*H*W, C)
         # I think here that each pixel is a  
         x_perm = x.permute(0, 2, 3, 1).contiguous()
         flat_x = x_perm.view(-1, self.embedding_dim)
+
+        print(f"[VQ] input shape after flattening = {tuple(flat_x.shape)}") 
 
         # Compute squared L2 distances between flat_x and each codebook vector.
         distances = (
@@ -46,6 +49,13 @@ class VectorQuantizer(nn.Module):
 
         # For each latent vector, we want to find the index of the closest embedding.
         encoding_indices = torch.argmin(distances, dim=1)
+        
+        # For debugging purposes
+        with torch.no_grad():
+            counts = torch.bincount(encoding_indices, minlength=self.num_embeddings)
+            used   = (counts > 0).sum().item()
+            pct    = used / float(self.num_embeddings)
+        
         encodings = F.one_hot(encoding_indices, self.num_embeddings).type(flat_x.dtype)
 
         # Quantize: replace each latent vector with its closest codebook vector.
@@ -64,8 +74,15 @@ class VectorQuantizer(nn.Module):
         # Total VQ Loss:
         vq_loss = codebook_loss + commitment_loss
 
+        loss_dict = {
+            "codebook_loss":   codebook_loss,
+            "commitment_loss": commitment_loss,
+            "vq_used":         torch.tensor(used, device=x.device),
+            "vq_used_pct":     torch.tensor(pct,  device=x.device),
+        }
+
         # Apply the straight-through estimator.
         # During the backward pass, the gradient from quantized will be passed to x.
         quantized = x + (quantized - x).detach()
 
-        return quantized, vq_loss, {'codebook_loss': codebook_loss, 'commitment_loss': commitment_loss}
+        return quantized, vq_loss, loss_dict

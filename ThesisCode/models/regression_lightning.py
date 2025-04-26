@@ -156,6 +156,9 @@ class UNet_base(pl.LightningModule):
         self.log("train_commitment_loss", loss_dict["commitment_loss"], on_step=True, on_epoch=True, prog_bar=True)
         self.log("train_total_loss", total_loss, on_step=True, on_epoch=True, prog_bar=True)
 
+        self.log("train_vq_used",     loss_dict["vq_used"],    on_step=True, on_epoch=True, prog_bar=True)
+        self.log("train_vq_used_pct", loss_dict["vq_used_pct"],on_step=True, on_epoch=True, prog_bar=True)
+
         return total_loss
 
     def validation_step(self, batch, batch_idx):
@@ -173,6 +176,10 @@ class UNet_base(pl.LightningModule):
         self.log("val_recon_loss", recon_loss, prog_bar=True)
         self.log("val_vq_loss", vq_loss, prog_bar=True)
         self.log("val_total_loss", total_loss, prog_bar=True)
+
+        self.log("val_vq_used",     loss_dict["vq_used"],    prog_bar=True)
+        self.log("val_vq_used_pct", loss_dict["vq_used_pct"],prog_bar=True)
+
         return total_loss
 
     def test_step(self, batch, batch_idx):

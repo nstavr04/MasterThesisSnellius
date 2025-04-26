@@ -1,8 +1,9 @@
 import json
 import torch
-from torch import nn
-import matplotlib.pyplot as plt
 import numpy as np
+from torch import nn
+import time
+import matplotlib.pyplot as plt
 import os
 from tqdm import tqdm
 import lightning.pytorch as pl
@@ -89,8 +90,13 @@ def get_model_losses(model_folder, data_file):
     for model_file in tqdm(models, desc="Models", leave=True):
         model, model_name = model_classes.get_model_class(model_file)
         loaded_model = model.load_from_checkpoint(f"{model_folder}/{model_file}")
+
         # Run testing; note that the test step now logs additional VQ losses.
+        t0 = time.time()
         model_loss = trainer.test(model=loaded_model, dataloaders=[test_dl])
+        t_inf = time.time() - t0
+        mins, secs = divmod(int(t_inf), 60)
+        print(f"Total inference time: {mins}m {secs}s for {loaded_model}")
         
         # For clarity, you might want to extract "test_total_loss" from the returned dictionary.
         # Here we assume model_loss is a list of dictionaries.

@@ -1,5 +1,8 @@
 from root import ROOT_DIR
 
+import time
+import numpy as np
+import torch
 import lightning.pytorch as pl
 from lightning.pytorch.callbacks import (
     ModelCheckpoint,
@@ -11,8 +14,6 @@ import argparse
 from models import unet_precip_regression_lightning as unet_regr
 from models import SmaAT_UNet_VQ_lightning
 from lightning.pytorch.tuner import Tuner
-import numpy as np
-import torch
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
@@ -91,7 +92,13 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
     # I can try it sometime. Low means fast but less precision, high means high precision but slower.
     torch.set_float32_matmul_precision('high')
 
+    # Track training time
+    t0 = time.time()
     trainer.fit(model=net, ckpt_path=hparams.resume_from_checkpoint)
+    t_train = time.time() - t0
+    
+    mins, secs = divmod(int(t_train), 60)
+    print(f"Total training time: {mins}m {secs}s")
 
 
 if __name__ == "__main__":
@@ -150,7 +157,7 @@ if __name__ == "__main__":
     # args.model = "SmaAT_UNet_VQ_MSE"
     # args.model = "SmaAT_UNet_VQ_CE"
 
-    for m in ["SmaAT_UNet_VQ_CE"]:
+    for m in ["SmaAT_UNet_VQ_MSE"]:
         args.model = m
         print(f"Start training model: {m}")
         train_regression(args, find_batch_size_automatically=False)

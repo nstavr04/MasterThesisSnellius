@@ -57,8 +57,14 @@ class GradCAM:
         """
         self.model.zero_grad()
         # Perform a forward pass.
-        # For your model, the forward returns (logits, vq_loss, loss_dict) so we take the first element.
-        output, _, _ = self.model(input_tensor)
+
+        out = self.model(input_tensor)
+
+        # We are only interested in the first element
+        if isinstance(out, tuple) and len(out) == 3:
+            output, _, _ = out
+        else:
+            output = out
         
         # Define a scalar target. (Customize this if you want to focus on a specific output.)
         if target_scalar is None:

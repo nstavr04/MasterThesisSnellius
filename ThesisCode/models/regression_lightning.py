@@ -137,8 +137,20 @@ class UNet_base(pl.LightningModule):
 
     def training_step(self, batch, batch_idx):
         x, y = batch
-        # Unpack the model output; note that we expect the VQ model to return three items.
-        logits, vq_loss, loss_dict = self(x)
+
+        if 'VQ' in self.hparams.model:
+            # Unpack the model output; note that we expect the VQ model to return three items.
+            logits, vq_loss, loss_dict = self(x)
+        else:
+            # Plain UNet return just logits
+            logits    = self(x)
+            vq_loss   = torch.tensor(0.0, device=logits.device)
+            loss_dict = {
+                "codebook_loss":   torch.tensor(0.0, device=logits.device),
+                "commitment_loss": torch.tensor(0.0, device=logits.device),
+                "vq_used":         torch.tensor(0.0, device=logits.device),
+                "vq_used_pct":     torch.tensor(0.0, device=logits.device),
+            }
 
         # Compute the reconstruction loss on the output.
         # For CE loss, do not squeeze logits so that the shape remains [B, num_buckets, H, W]
@@ -163,7 +175,20 @@ class UNet_base(pl.LightningModule):
 
     def validation_step(self, batch, batch_idx):
         x, y = batch
-        logits, vq_loss, loss_dict = self(x)
+
+        if 'VQ' in self.hparams.model:
+            # Unpack the model output; note that we expect the VQ model to return three items.
+            logits, vq_loss, loss_dict = self(x)
+        else:
+            # Plain UNet return just logits
+            logits    = self(x)
+            vq_loss   = torch.tensor(0.0, device=logits.device)
+            loss_dict = {
+                "codebook_loss":   torch.tensor(0.0, device=logits.device),
+                "commitment_loss": torch.tensor(0.0, device=logits.device),
+                "vq_used":         torch.tensor(0.0, device=logits.device),
+                "vq_used_pct":     torch.tensor(0.0, device=logits.device),
+            }
 
         # For CE loss, do not squeeze logits so that the shape remains [B, num_buckets, H, W]
         if self.hparams.vqmodel_recon_loss_type == 'ce':
@@ -184,7 +209,21 @@ class UNet_base(pl.LightningModule):
 
     def test_step(self, batch, batch_idx):
         x, y = batch
-        logits, vq_loss, loss_dict = self(x)
+
+        if 'VQ' in self.hparams.model:
+            # Unpack the model output; note that we expect the VQ model to return three items.
+            logits, vq_loss, loss_dict = self(x)
+        else:
+            # Plain UNet return just logits
+            logits    = self(x)
+            vq_loss   = torch.tensor(0.0, device=logits.device)
+            loss_dict = {
+                "codebook_loss":   torch.tensor(0.0, device=logits.device),
+                "commitment_loss": torch.tensor(0.0, device=logits.device),
+                "vq_used":         torch.tensor(0.0, device=logits.device),
+                "vq_used_pct":     torch.tensor(0.0, device=logits.device),
+            }
+
         factor = 47.83
 
         if self.hparams.vqmodel_recon_loss_type == 'ce':

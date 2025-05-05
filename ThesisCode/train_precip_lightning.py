@@ -30,7 +30,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
         hparams.vqmodel_recon_loss_type = "mwae"
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     elif hparams.model in ["SmaAT_UNet"]:
-        net = unet_regr.UNet_Attention(hparams=hparams)
+        net = unet_regr.UNetDS_Attention(hparams=hparams)
     elif hparams.model in ["UNet"]:
         net = unet_regr.UNet(hparams=hparams)
     else:

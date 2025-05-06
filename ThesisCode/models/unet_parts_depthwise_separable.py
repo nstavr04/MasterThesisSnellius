@@ -4,6 +4,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.nn import LPPool2d
 from models.layers import DepthwiseSeparableConv
 
 # Used in SmaAT-UNet
@@ -39,6 +40,7 @@ class DoubleConvDS(nn.Module):
         return self.double_conv(x)
 
 # Used in SmaAT-UNet
+# Changed max pool with l2 pool
 class DownDS(nn.Module):
     """Downscaling with maxpool then double conv"""
 
@@ -48,9 +50,15 @@ class DownDS(nn.Module):
             nn.MaxPool2d(2),
             DoubleConvDS(in_channels, out_channels, kernels_per_layer=kernels_per_layer),
         )
+        # self.pool_conv = nn.Sequential(
+        #     # L2-pool: root-mean-square over each 2×2 patch
+        #     LPPool2d(norm_type=2, kernel_size=2, stride=2),
+        #     DoubleConvDS(in_channels, out_channels, kernels_per_layer=kernels_per_layer),
+        # )
 
     def forward(self, x):
         return self.maxpool_conv(x)
+        #return self.pool_conv(x)
 
 # Used in SmaAT-UNet
 class UpDS(nn.Module):

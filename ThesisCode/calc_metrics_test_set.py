@@ -61,8 +61,8 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             y_pred_adj *= 12
             y_true_adj *= 12
             # convert to masks for comparison
-            y_pred_mask = y_pred_adj > threshold
-            y_true_mask = y_true_adj > threshold
+            y_pred_mask = y_pred_adj > (threshold)
+            y_true_mask = y_true_adj > (threshold)
 
             tn, fp, fn, tp = np.bincount(
                 y_true_mask.cpu().view(-1) * 2 + y_pred_mask.cpu().view(-1), minlength=4
@@ -112,7 +112,7 @@ def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
         in_file=ROOT_DIR
         / "data"
         / "precipitation"
-        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{int(threshold*100)}.h5",
+        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{int(threshold)}.h5",
         num_input_images=12,
         num_output_images=6,
         train=False,

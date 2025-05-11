@@ -38,7 +38,7 @@ class GradCAM:
         
         # Register the hooks on the target layer.
         self.hook_handles.append(self.target_layer.register_forward_hook(forward_hook))
-        self.hook_handles.append(self.target_layer.register_backward_hook(backward_hook))
+        self.hook_handles.append(self.target_layer.register_full_backward_hook(backward_hook))
     
     def remove_hooks(self):
         for handle in self.hook_handles:

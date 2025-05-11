@@ -92,6 +92,10 @@ def get_bucket_weights(device=None):
         1.0000
     ], device=device)
 
+    # return torch.tensor([1.0000, 0.9617, 0.9084, 0.8428, 0.7823,
+    #     0.7298, 0.6901, 0.6667, 0.6472, 0.6359,
+    #     0.6310, 0.6295, 0.6270, 0.6014, 0.5107], device=device)
+
     # No weights gives very bad val loss
     # return torch.tensor([
     #     1.0000,

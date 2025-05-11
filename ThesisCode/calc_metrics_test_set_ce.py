@@ -12,7 +12,7 @@ import numpy as np
 import json
 from utils.buckets import get_bucket_means
 
-def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
+def get_metrics_from_model(model, test_dl, threshold=0.01667, device: str = "cpu"):
     device = torch.device(device)
     loss_func = nn.functional.mse_loss
     with torch.no_grad():
@@ -70,8 +70,8 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             y_pred_adj *= 12
             y_true_adj *= 12
             # Create binary masks based on the threshold
-            y_pred_mask = y_pred_adj > threshold
-            y_true_mask = y_true_adj > threshold
+            y_pred_mask = y_pred_adj > (threshold * 47.83 * 12)
+            y_true_mask = y_true_adj > (threshold * 47.83 * 12)
 
             # Compute confusion matrix components using np.bincount
             tn, fp, fn, tp = np.bincount(
@@ -116,12 +116,12 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
     )
 
 
-def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
+def calculate_metrics_for_models(model_folder, threshold: float = 0.01667):
     dataset = dataset_precip.precipitation_maps_oversampled_h5(
         in_file=ROOT_DIR
         / "data"
         / "precipitation"
-        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{int(threshold*100)}.h5",
+        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{int(50)}.h5",
         num_input_images=12,
         num_output_images=6,
         train=False,

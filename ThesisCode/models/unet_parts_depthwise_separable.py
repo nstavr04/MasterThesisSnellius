@@ -58,7 +58,7 @@ class DownDS(nn.Module):
 
     def forward(self, x):
         return self.maxpool_conv(x)
-        #return self.pool_conv(x)
+        # return self.pool_conv(x)
 
 # Used in SmaAT-UNet
 class UpDS(nn.Module):

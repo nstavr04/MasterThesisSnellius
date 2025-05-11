@@ -141,8 +141,8 @@ if __name__ == "__main__":
     args.use_oversampled_dataset = True
     args.dataset_folder = (
         # BE AWARE THAT THIS IS 20 NOT 50 RIGHT NOW
-        # ROOT_DIR / "data" / "precipitation" / "train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_50.h5"
-        ROOT_DIR / "data" / "precipitation" / "train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_20.h5"
+        ROOT_DIR / "data" / "precipitation" / "train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_50.h5"
+        #ROOT_DIR / "data" / "precipitation" / "train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_20.h5"
     )
     # args.resume_from_checkpoint = f"lightning/precip_regression/{args.model}/UNetDS_Attention.ckpt"
 

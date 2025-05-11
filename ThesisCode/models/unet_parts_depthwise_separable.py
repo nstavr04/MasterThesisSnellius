@@ -6,8 +6,11 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import LPPool2d
 from models.layers import DepthwiseSeparableConv
+from models.GhostNetModule import GhostModule
 
 # Used in SmaAT-UNet
+
+# Replaced with GhostNet
 class DoubleConvDS(nn.Module):
     """(convolution => [BN] => ReLU) * 2"""
 
@@ -15,29 +18,53 @@ class DoubleConvDS(nn.Module):
         super().__init__()
         if not mid_channels:
             mid_channels = out_channels
-        self.double_conv = nn.Sequential(
-            DepthwiseSeparableConv(
-                in_channels,
-                mid_channels,
-                kernel_size=3,
-                kernels_per_layer=kernels_per_layer,
-                padding=1,
-            ),
-            nn.BatchNorm2d(mid_channels),
-            nn.ReLU(inplace=True),
-            DepthwiseSeparableConv(
-                mid_channels,
-                out_channels,
-                kernel_size=3,
-                kernels_per_layer=kernels_per_layer,
-                padding=1,
-            ),
-            nn.BatchNorm2d(out_channels),
-            nn.ReLU(inplace=True),
+        # self.double_conv = nn.Sequential(
+        #     DepthwiseSeparableConv(
+        #         in_channels,
+        #         mid_channels,
+        #         kernel_size=3,
+        #         kernels_per_layer=kernels_per_layer,
+        #         padding=1,
+        #     ),
+        #     nn.BatchNorm2d(mid_channels),
+        #     nn.ReLU(inplace=True),
+        #     DepthwiseSeparableConv(
+        #         mid_channels,
+        #         out_channels,
+        #         kernel_size=3,
+        #         kernels_per_layer=kernels_per_layer,
+        #         padding=1,
+        #     ),
+        #     nn.BatchNorm2d(out_channels),
+        #     nn.ReLU(inplace=True),
+        # )
+
+         # 1st ghost conv block
+        self.ghost1 = GhostModule(
+            inp=in_channels,
+            oup=mid_channels,
+            kernel_size=3,
+            ratio=2,          # or whatever s you want
+            dw_size=3,
+            stride=1,
+            relu=True
+        )
+        # 2nd ghost conv block
+        self.ghost2 = GhostModule(
+            inp=mid_channels,
+            oup=out_channels,
+            kernel_size=3,
+            ratio=2,
+            dw_size=3,
+            stride=1,
+            relu=True
         )
 
     def forward(self, x):
-        return self.double_conv(x)
+        # return self.double_conv(x)
+        x = self.ghost1(x)
+        x = self.ghost2(x)
+        return x
 
 # Used in SmaAT-UNet
 # Changed max pool with l2 pool

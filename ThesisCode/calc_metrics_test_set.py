@@ -112,7 +112,7 @@ def calculate_metrics_for_models(model_folder, threshold: float = 0.5):
         in_file=ROOT_DIR
         / "data"
         / "precipitation"
-        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{int(threshold)}.h5",
+        / f"train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_{50}.h5",
         num_input_images=12,
         num_output_images=6,
         train=False,

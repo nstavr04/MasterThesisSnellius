@@ -4,7 +4,7 @@
 #SBATCH --nodes=1             # It needs to match Trainer(num_nodes=...)
 #SBATCH --gres=gpu:1                     # Number of GPUs per node
 #SBATCH --cpus-per-task=4
-#SBATCH --partition=gpu_a100
+#SBATCH --partition=gpu_h100
 #SBATCH --ntasks-per-node=1                # It needs to match Trainer (devices=...)
 #SBATCH --time=1:00:00                  # Time limit hrs:min:sec
 

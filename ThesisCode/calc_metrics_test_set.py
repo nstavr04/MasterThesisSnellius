@@ -46,6 +46,7 @@ def get_metrics_from_model(model, test_dl, threshold=0.5, device: str = "cpu"):
             # For computing metrics, use logits as predictions
             y_pred = logits
             # denormalize predictions and ground truth
+            # We do with 47.83 because it's the maximum precipitation in the dataset per 5 minutes
             y_pred_adj = y_pred.squeeze() * 47.83
             y_true_adj = y_true.squeeze() * 47.83
 

@@ -29,8 +29,9 @@ class DoubleMixConv(nn.Module):
                    n_chunks=kernels_per_layer,
                    stride=1,
                    bias=False),
-            nn.BatchNorm2d(in_channels),
-            nn.ReLU(inplace=True),
+            # DepthwiseSeparableConvs do the conv and then the point-wise and then they do BatchNorm and ReLU
+            # nn.BatchNorm2d(in_channels),
+            # nn.ReLU(inplace=True),
             # point-wise to bottleneck
             nn.Conv2d(in_channels,
                       mid_channels,
@@ -46,8 +47,8 @@ class DoubleMixConv(nn.Module):
                    n_chunks=kernels_per_layer,
                    stride=1,
                    bias=False),
-            nn.BatchNorm2d(mid_channels),
-            nn.ReLU(inplace=True),
+            # nn.BatchNorm2d(mid_channels),
+            # nn.ReLU(inplace=True),
             nn.Conv2d(mid_channels,
                       out_channels,
                       kernel_size=1,

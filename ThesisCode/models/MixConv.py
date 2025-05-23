@@ -29,6 +29,8 @@ class MDConv(nn.Module):
 
         self.layers = nn.ModuleList()
         for idx in range(self.n_chunks):
+            # Depending on chunks we get differeent kernel sizes
+            # e.g n_chunks = 2 we get kernel 3x3 and 5x5
             kernel_size = 2 * idx + 3
             self.layers.append(DepthwiseConv2D(self.split_out_channels[idx], kernal_size=kernel_size, stride=stride, bias=bias))
 

@@ -50,7 +50,7 @@ class SmaAT_UNet_VQ(Precip_regression_base):
 
         # UpDS defined in unet_parts_depthwise_separable.py
         self.up1 = MixUpDS(1024, 512 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
-        self.up2 = MixUpDS(512, 256 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
+        self.up2 = UpDS(512, 256 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up3 = UpDS(256, 128 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up4 = UpDS(128, 64, self.bilinear, kernels_per_layer=kernels_per_layer)
 

@@ -1,5 +1,5 @@
 from models.unet_parts import Down, DoubleConv, Up, OutConv
-from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS
+from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS, MixDownDS, MixUpDS
 from models.layers import CBAM
 from models.regression_lightning import Precip_regression_base
 
@@ -147,13 +147,13 @@ class UNetDS_Attention(Precip_regression_base):
         self.cbam2 = CBAM(128, reduction_ratio=reduction_ratio)
         self.down2 = DownDS(128, 256, kernels_per_layer=kernels_per_layer)
         self.cbam3 = CBAM(256, reduction_ratio=reduction_ratio)
-        self.down3 = DownDS(256, 512, kernels_per_layer=kernels_per_layer)
+        self.down3 = MixDownDS(256, 512, kernels_per_layer=kernels_per_layer)
         self.cbam4 = CBAM(512, reduction_ratio=reduction_ratio)
         factor = 2 if self.bilinear else 1
-        self.down4 = DownDS(512, 1024 // factor, kernels_per_layer=kernels_per_layer)
+        self.down4 = MixDownDS(512, 1024 // factor, kernels_per_layer=kernels_per_layer)
         self.cbam5 = CBAM(1024 // factor, reduction_ratio=reduction_ratio)
         # UpDS defined in unet_parts_depthwise_separable.py
-        self.up1 = UpDS(1024, 512 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
+        self.up1 = MixUpDS(1024, 512 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up2 = UpDS(512, 256 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up3 = UpDS(256, 128 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up4 = UpDS(128, 64, self.bilinear, kernels_per_layer=kernels_per_layer)

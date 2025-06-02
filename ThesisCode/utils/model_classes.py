@@ -5,21 +5,15 @@ import lightning.pytorch as pl
 # Used in the plotting and for the comparison etc. in testing
 def get_model_class(model_file) -> tuple[type[pl.LightningModule], str]:
     
-    if "SmaAT_UNet_VQ_MSE" in model_file:
+    if "SmaAT_UNet_VQ_MSE_PartialMixConv" in model_file:
+        model_name = "SmaAT_UNet_VQ_MSE_PartialMixConv"
+        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
+    elif "SmaAT_UNet_VQ_MSE" in model_file:
         model_name = "SmaAT_UNet_VQ_MSE"
-        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
-    elif "SmaAT_UNet_VQ_CE" in model_file:
-        model_name = "SmaAT_UNet_VQ_CE"
-        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
-    elif "SmaAT_UNet_VQ_MWAE" in model_file:
-        model_name = "SmaAT_UNet_VQ_MWAE"
         model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
     elif "SmaAT_UNet" in model_file:
         model_name = "SmaAT_UNet"
         model = unet_regr.UNetDS_Attention
-    elif "UNet" in model_file:
-        model_name = "UNet"
-        model = unet_regr.UNet
     else:
         raise NotImplementedError("Model not found")
     return model, model_name

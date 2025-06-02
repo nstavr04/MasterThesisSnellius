@@ -131,6 +131,7 @@ def plot_losses(test_losses, loss_key: str):
 if __name__ == "__main__":
     # Models that are compared should be in this folder (the ones with the lowest validation error)
     model_folder = ROOT_DIR / "checkpoints" / "comparison"
+    # We can evaluate on the NL-20 dataset as well
     data_file = (
         ROOT_DIR / "data" / "precipitation" / "train_test_2016-2019_input-length_12_img-ahead_6_rain-threshold_50.h5"
     )

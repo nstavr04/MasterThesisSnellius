@@ -6,21 +6,18 @@ import torch.nn as nn
 import torch.nn.functional as F
 from torch.nn import LPPool2d
 from models.layers import DepthwiseSeparableConv
-from models.GhostNetModule import GhostModule
 from models.MixConv import MDConv
 
-# Used in SmaAT-UNet
+# Components used in SmaAT-UNet and SmaAT-UNet-VQ variations
 
 # MixConvs
 class DoubleMixConv(nn.Module):
-    """(convolution => [BN] => ReLU) * 2"""
+    """(mixed convolution => [BN] => ReLU) * 2"""
 
     def __init__(self, in_channels, out_channels, mid_channels=None, kernels_per_layer=1):
         super().__init__()
         if not mid_channels:
             mid_channels = out_channels
-
-        # The gpt better one
 
         # ─── Stage 1: MixConv on in_channels → 1×1 to mid_channels ───
         self.mix1 = nn.Sequential(
@@ -29,9 +26,6 @@ class DoubleMixConv(nn.Module):
                    n_chunks=kernels_per_layer,
                    stride=1,
                    bias=False),
-            # DepthwiseSeparableConvs do the conv and then the point-wise and then they do BatchNorm and ReLU
-            # nn.BatchNorm2d(in_channels),
-            # nn.ReLU(inplace=True),
             # point-wise to bottleneck
             nn.Conv2d(in_channels,
                       mid_channels,
@@ -47,8 +41,6 @@ class DoubleMixConv(nn.Module):
                    n_chunks=kernels_per_layer,
                    stride=1,
                    bias=False),
-            # nn.BatchNorm2d(mid_channels),
-            # nn.ReLU(inplace=True),
             nn.Conv2d(mid_channels,
                       out_channels,
                       kernel_size=1,
@@ -93,64 +85,10 @@ class DoubleConvDS(nn.Module):
             nn.ReLU(inplace=True),
         )
 
-        #  1st ghost conv block
-        # self.ghost1 = GhostModule(
-        #     inp=in_channels,
-        #     oup=mid_channels,
-        #     kernel_size=3,
-        #     ratio=2,          # or whatever s you want
-        #     dw_size=3,
-        #     stride=1,
-        #     relu=True
-        # )
-        # # 2nd ghost conv block
-        # self.ghost2 = GhostModule(
-        #     inp=mid_channels,
-        #     oup=out_channels,
-        #     kernel_size=3,
-        #     ratio=2,
-        #     dw_size=3,
-        #     stride=1,
-        #     relu=True
-        # )
-
-        #MixConv
-
-        # --- 1st MixConv block (in_channels → mid_channels) ---
-        # self.mix1 = nn.Sequential(
-        #     # depthwise MixConv keeps channels == in_channels
-        #     MDConv(out_channels=in_channels,
-        #            n_chunks=kernels_per_layer,
-        #            stride=1,
-        #            bias=False),
-        #     nn.BatchNorm2d(in_channels),
-        #     nn.ReLU(inplace=True),
-        #     # pointwise to mid_channels
-        #     nn.Conv2d(in_channels, mid_channels, kernel_size=1, bias=False),
-        # )
-
-        # # --- 2nd MixConv block (mid_channels → out_channels) ---
-        # self.mix2 = nn.Sequential(
-        #     MDConv(out_channels=mid_channels,
-        #            n_chunks=kernels_per_layer,
-        #            stride=1,
-        #            bias=False),
-        #     nn.BatchNorm2d(mid_channels),
-        #     nn.ReLU(inplace=True),
-        #     nn.Conv2d(mid_channels, out_channels, kernel_size=1, bias=False),
-        # )
-
     def forward(self, x):
         return self.double_conv(x)
 
-        # x = self.ghost1(x)
-        # x = self.ghost2(x)
-
-        # out = self.mix2(self.mix1(x))
-        # return x + out
-
 # Used in SmaAT-UNet
-# Changed max pool with l2 pool
 class DownDS(nn.Module):
     """Downscaling with maxpool then double conv"""
 
@@ -203,6 +141,7 @@ class UpDS(nn.Module):
         x = torch.cat([x2, x1], dim=1)
         return self.conv(x)
 
+# Used in SmaAT-UNet-VQ-mixedconvs
 class MixDownDS(nn.Module):
     """Downscaling with maxpool then double conv"""
 
@@ -216,7 +155,7 @@ class MixDownDS(nn.Module):
     def forward(self, x):
         return self.maxpool_conv(x)
 
-# Used in SmaAT-UNet
+# Used in SmaAT-UNet-VQ-mixedconvs
 class MixUpDS(nn.Module):
     """Upscaling then double conv"""
 

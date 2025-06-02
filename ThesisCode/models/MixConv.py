@@ -4,6 +4,7 @@ import torch.nn.functional as F
 
 import numpy as np
 
+# 
 
 def split_layer(total_channels, num_groups):
     split = [int(np.ceil(total_channels / num_groups)) for _ in range(num_groups)]
@@ -21,6 +22,7 @@ class DepthwiseConv2D(nn.Module):
         out = self.depthwise_conv(x)
         return out
 
+# Taken from https://github.com/leaderj1001/Mixed-Depthwise-Convolutional-Kernels/tree/master
 class MDConv(nn.Module):
     def __init__(self, out_channels, n_chunks, stride=1, bias=False):
         super(MDConv, self).__init__()

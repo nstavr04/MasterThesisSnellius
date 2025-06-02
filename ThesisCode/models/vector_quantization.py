@@ -15,10 +15,11 @@ class VectorQuantizer(nn.Module):
         super(VectorQuantizer, self).__init__()
         self.num_embeddings = num_embeddings
         self.embedding_dim = embedding_dim
-        # This is b basically
+        # This is variable b
         self.commitment_cost = commitment_cost
 
         # Initialize the embedding codebook with uniform random values.
+        # Could be something that can be done differently in the future
         self.embedding = nn.Embedding(self.num_embeddings, self.embedding_dim)
         self.embedding.weight.data.uniform_(-1/self.num_embeddings, 1/self.num_embeddings)
 
@@ -34,7 +35,6 @@ class VectorQuantizer(nn.Module):
         """
 
         # Permute to shape (B, H, W, C) and flatten to (B*H*W, C)
-        # I think here that each pixel is a  
         x_perm = x.permute(0, 2, 3, 1).contiguous()
         flat_x = x_perm.view(-1, self.embedding_dim)
 
@@ -50,7 +50,7 @@ class VectorQuantizer(nn.Module):
         # For each latent vector, we want to find the index of the closest embedding.
         encoding_indices = torch.argmin(distances, dim=1)
         
-        # For debugging purposes
+        # For debugging purposes we can view the codebook utilization percentage (pct)
         with torch.no_grad():
             counts = torch.bincount(encoding_indices, minlength=self.num_embeddings)
             used   = (counts > 0).sum().item()

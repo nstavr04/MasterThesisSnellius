@@ -6,7 +6,6 @@ from torch.utils.data.sampler import SubsetRandomSampler
 from utils import dataset_precip
 import argparse
 import numpy as np
-from utils.buckets import get_bucket_boundaries, get_bucket_means, get_bucket_weights
 
 ###############################################################################
 # Base Class for SmaAT_UNet and SmaAT_UNet_VQ
@@ -20,7 +19,7 @@ class UNet_base(pl.LightningModule):
             "--model",
             type=str,
             default="SmaAT_UNet_VQ_MSE",
-            choices=["SmaAT_UNet_VQ_CE", "SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MWAE", "SmaAT_UNet", "UNet"],
+            choices=["SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE", "SmaAT_UNet"],
         )
         # Basic model arguments
         parser.add_argument("--n_channels", type=int, default=12)
@@ -34,7 +33,7 @@ class UNet_base(pl.LightningModule):
         parser.add_argument("--vq_commitment_cost", type=float, default=0.25)
 
         # Loss type for the VQ model variations
-        parser.add_argument("--vqmodel_recon_loss_type", type=str, default="mse", choices=["ce", "mse", "mwae"])
+        parser.add_argument("--model_type", type=str, default="partialmixconv", choices=["partialmixconv", "nomixconv"])
 
         return parser
 
@@ -57,83 +56,13 @@ class UNet_base(pl.LightningModule):
         }
         return [opt], [scheduler]
 
-    # Cross Entropy thresholding loss as defined in RainAI paper
-    # We use it only for the recon loss
-    def ce_recon_loss(self, y_pred, y_true):
-        """ Computes a bucketed cross-entropy reconstruction loss.
-        - y_pred: logits of shape [B, num_buckets, H, W]
-        - y_true: continuous targets of shape [B, 1, H, W]
-        Hard-coded bucket settings are used here. """
-        # Set bucket boundaries based on the histogram data on view_dataset.ipynb.
-        # These boundaries are chosen so that:
-        # - Class 0: values < 0.00333
-        # - Class 1: 0.00333 ≤ values < 0.00667
-        # - Class 2: 0.00667 ≤ values < 0.01000
-        # - Class 3: 0.01000 ≤ values < 0.01333
-        # - Class 4: 0.01333 ≤ values < 0.01667
-        # - Class 5: 0.01667 ≤ values < 0.02000
-        # - Class 6: 0.02000 ≤ values < 0.02333
-        # - Class 7: 0.02333 ≤ values < 0.02667
-        # - Class 8: 0.02667 ≤ values < 0.03000
-        # - Class 9: 0.03000 ≤ values < 0.03333
-        # - Class 10: 0.03333 ≤ values < 0.03667
-        # - Class 11: 0.03667 ≤ values < 0.04000
-        # - Class 12: 0.04000 ≤ values < 0.04333
-        # - Class 13: 0.04333 ≤ values < 0.04667
-        # - Class 14: values ≥ 0.04667
-
-        # Bin edges (14 values define 15 buckets)
-        bucket_boundaries = get_bucket_boundaries(device=y_true.device)
-    
-        # Midpoint means of buckets
-        bucket_means = get_bucket_means(device=y_true.device)
-
-        # Weights (inverse frequency approx., can be tuned further)
-        bucket_weights = get_bucket_weights(device=y_true.device)
-
-        # Convert continuous target to bucket indices.
-        # Assume y_true shape is [B, 1, H, W]; squeeze out the channel dimension.
-        target_class = torch.bucketize(y_true, bucket_boundaries).squeeze(1).long()  # Shape: [B, H, W]
-
-        # Compute cross-entropy loss per pixel (no reduction)
-        ce_loss = nn.functional.cross_entropy(
-            y_pred, target_class, weight=bucket_weights, reduction="none"
-        )
-        
-        # Final loss: sum over all pixels and then divide by batch size.
-        final_loss = ce_loss.sum() / y_true.size(0)
-
-        # Optional: Compute a derived continuous forecast from bucket probabilities for logging.
-        # This lets you obtain an MSE metric for comparison.
-        p = torch.softmax(y_pred, dim=1)  # shape: [B, num_buckets, H, W]
-        predicted_cont = torch.sum(p * bucket_means.view(1, -1, 1, 1), dim=1)  # shape: [B, H, W]
-        mse_metric = nn.functional.mse_loss(
-            predicted_cont, y_true.squeeze(1), reduction="sum"
-        ) / y_true.size(0)
-        self.log("train_mse_metric", mse_metric, on_step=True, on_epoch=True, prog_bar=True)
-
-        return final_loss
-
-    # MWAE loss function as defined in GPTCast paper
-    # We use it only for the recon loss
-    def mwae(self, x, y):
-        sx = sigmoid(x)
-        sy = sigmoid(y)
-        return abs(sx - sy) * sx
-
     def loss_func(self, y_pred, y_true):
         """
         Reconstruction (or regression) loss.
-        We use the mean squared error averaged per image or the MWAE loss.
+        We use the mean squared error averaged per image.
         """
-        if self.hparams.vqmodel_recon_loss_type == 'ce':
-            return self.ce_recon_loss(y_pred, y_true)
-        elif self.hparams.vqmodel_recon_loss_type == 'mwae':
-            return self.mwae(y_pred, y_true).sum() / y_true.size(0)
-            # return self.mwae(y_pred, y_true).mean()
-        else:
-            return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
-            # return nn.functional.mse_loss(y_pred, y_true, reduction="mean")
+        return nn.functional.mse_loss(y_pred, y_true, reduction="sum") / y_true.size(0)
+        # return nn.functional.mse_loss(y_pred, y_true, reduction="mean")
 
     def training_step(self, batch, batch_idx):
         x, y = batch
@@ -142,7 +71,7 @@ class UNet_base(pl.LightningModule):
             # Unpack the model output; note that we expect the VQ model to return three items.
             logits, vq_loss, loss_dict = self(x)
         else:
-            # Plain UNet return just logits
+            # Plain SmaAT-UNet return just logits
             logits    = self(x)
             vq_loss   = torch.tensor(0.0, device=logits.device)
             loss_dict = {
@@ -153,11 +82,7 @@ class UNet_base(pl.LightningModule):
             }
 
         # Compute the reconstruction loss on the output.
-        # For CE loss, do not squeeze logits so that the shape remains [B, num_buckets, H, W]
-        if self.hparams.vqmodel_recon_loss_type == 'ce':
-            recon_loss = self.loss_func(logits, y)
-        else:
-            recon_loss = self.loss_func(logits.squeeze(), y)
+        recon_loss = self.loss_func(logits.squeeze(), y)
         # Total loss includes both the reconstruction and the VQ losses.
         total_loss = recon_loss + vq_loss
 
@@ -180,7 +105,7 @@ class UNet_base(pl.LightningModule):
             # Unpack the model output; note that we expect the VQ model to return three items.
             logits, vq_loss, loss_dict = self(x)
         else:
-            # Plain UNet return just logits
+            # Plain SmaAT-UNet return just logits
             logits    = self(x)
             vq_loss   = torch.tensor(0.0, device=logits.device)
             loss_dict = {
@@ -190,11 +115,7 @@ class UNet_base(pl.LightningModule):
                 "vq_used_pct":     torch.tensor(0.0, device=logits.device),
             }
 
-        # For CE loss, do not squeeze logits so that the shape remains [B, num_buckets, H, W]
-        if self.hparams.vqmodel_recon_loss_type == 'ce':
-            recon_loss = self.loss_func(logits, y)
-        else:
-            recon_loss = self.loss_func(logits.squeeze(), y)
+        recon_loss = self.loss_func(logits.squeeze(), y)
 
         total_loss = recon_loss + vq_loss
 
@@ -214,7 +135,7 @@ class UNet_base(pl.LightningModule):
             # Unpack the model output; note that we expect the VQ model to return three items.
             logits, vq_loss, loss_dict = self(x)
         else:
-            # Plain UNet return just logits
+            # Plain SmaAT-UNet return just logits
             logits    = self(x)
             vq_loss   = torch.tensor(0.0, device=logits.device)
             loss_dict = {
@@ -226,13 +147,8 @@ class UNet_base(pl.LightningModule):
 
         factor = 47.83
 
-        if self.hparams.vqmodel_recon_loss_type == 'ce':
-            recon_loss = self.loss_func(logits, y)
-            # For denormalized loss, also avoid squeezing
-            loss_denorm = self.loss_func(logits * factor, y * factor)
-        else:
-            recon_loss = self.loss_func(logits.squeeze(), y)
-            loss_denorm = self.loss_func(logits.squeeze() * factor, y * factor)
+        recon_loss = self.loss_func(logits.squeeze(), y)
+        loss_denorm = self.loss_func(logits.squeeze() * factor, y * factor)
 
         total_loss = recon_loss + vq_loss
         self.log("test_recon_loss", recon_loss)
@@ -260,7 +176,7 @@ class Precip_regression_base(UNet_base):
         return parser
 
     def __init__(self, hparams):
-        super().__init__(hparams=hparams)
+        super().__init__(hparams)
         self.train_dataset = None
         self.valid_dataset = None
         self.train_sampler = None

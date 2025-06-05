@@ -38,8 +38,6 @@ class VectorQuantizer(nn.Module):
         x_perm = x.permute(0, 2, 3, 1).contiguous()
         flat_x = x_perm.view(-1, self.embedding_dim)
 
-        print(f"[VQ] input shape after flattening = {tuple(flat_x.shape)}") 
-
         # Compute squared L2 distances between flat_x and each codebook vector.
         distances = (
             torch.sum(flat_x ** 2, dim=1, keepdim=True)

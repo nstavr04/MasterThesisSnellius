@@ -5,6 +5,8 @@
 #SBATCH --gres=gpu:1                     # Number of GPUs per node
 #SBATCH --cpus-per-task=4
 #SBATCH --partition=gpu_h100
+#SBATCH --mail-type=END
+#SBATCH --mail-user=nikolas.stavrou00@gmail.com
 #SBATCH --ntasks-per-node=1                # It needs to match Trainer (devices=...)
 #SBATCH --time=2-02:30:00                 # Time limit days-hrs:min:sec
 

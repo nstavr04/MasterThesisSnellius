@@ -17,7 +17,10 @@ from lightning.pytorch.tuner import Tuner
 
 
 def train_regression(hparams, find_batch_size_automatically: bool = False):
-    if hparams.model in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
+    if hparams.model in ["SmaAT_UNet_VQ_MSE_FullMixConv"]:
+        hparams.model_type = "fullmixconv"
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    elif hparams.model in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
         hparams.model_type = "partialmixconv"
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
     elif hparams.model in ["SmaAT_UNet_VQ_MSE"]:
@@ -29,7 +32,7 @@ def train_regression(hparams, find_batch_size_automatically: bool = False):
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
     # Create a custom model name based on the model string and the VQ hyperparameters.
-    if hparams.model in ["SmaAT_UNet_VQ_MSE", "SmaAT_UNet_VQ_MSE_PartialMixConv"]:
+    if hparams.model in ["SmaAT_UNet_VQ_MSE_FullMixConv", "SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE" ]:
         custom_model_name = (
             f"{hparams.model}-num{hparams.vq_num_embeddings}-commit{hparams.vq_commitment_cost}"
         )
@@ -107,7 +110,7 @@ if __name__ == "__main__":
     parser.add_argument("--batch_size", type=int, default=8)
 
     parser.add_argument("--learning_rate", type=float, default=0.001)
-    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument("--epochs", type=int, default=1)
     parser.add_argument("--fast_dev_run", type=bool, default=False)
     parser.add_argument("--resume_from_checkpoint", type=str, default=None)
     parser.add_argument("--val_check_interval", type=float, default=None)
@@ -121,6 +124,7 @@ if __name__ == "__main__":
     # args.gpus = 1
 
     args.lr_patience = 4
+    # Early stopping
     args.es_patience = 15
     # args.val_check_interval = 0.25
     args.kernels_per_layer = 2
@@ -135,37 +139,38 @@ if __name__ == "__main__":
     # train_regression(args, find_batch_size_automatically=False)
 
     # I can change these 2 if I want
-    args.vq_num_embeddings = 32
-    args.vq_commitment_cost = 0.25
+    args.vq_num_embeddings = 16
+    args.vq_commitment_cost = 0.75
 
     # Pick which models we want to train
     # args.model = "UNet"
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MSE"
     # args.model = "SmaAT_UNet_VQ_MSE_PartialMixConv"
+    # args.model = "SmaAT_UNet_VQ_MSE_FullMixConv"
 
-    for m in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
-        args.model = m
-        print(f"Start training model: {m}")
-        train_regression(args, find_batch_size_automatically=False)
+    # for m in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
+    #     args.model = m
+    #     print(f"Start training model: {m}")
+    #     train_regression(args, find_batch_size_automatically=False)
 
     # Use this if we want hyperparameter tuning on VQ models
 
     # Define the hyperparameter ranges:
     # For commitment cost, we use 5 values in logspace between 1e-2 and 1 (since log(0) is undefined)
 
-    # commitment_cost_values = [0.25]# np.linspace(0, 1, num=5) # e.g. [0, 0.25, 0.5, 0.75, 1.0]
-    # num_embeddings_values = [32] # [32, 64, 128, 256, 512]
+    commitment_cost_values = [0.25, 0.5, 0.75, 1]# np.linspace(0, 1, num=5) # e.g. [0, 0.25, 0.5, 0.75, 1.0]
+    num_embeddings_values = [8, 18, 32, 64] # [32, 64, 128, 256, 512]
 
-    # for num_emb in num_embeddings_values:
-    #     for comm_cost in commitment_cost_values:
-    #         # Update hyperparameters:
-    #         args.vq_num_embeddings = num_emb
-    #         args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
-    #         args.model = "SmaAT_UNet_VQ_MSE_PartialMixConv"
-    #         # Define a folder name that reflects the hyperparameter settings:
-    #         # I think this does nothing
-    #         args.save_folder = f"SmaAT-UNet-VQ-MSE-num{num_emb}-commitment{comm_cost:.4f}"
+    for num_emb in num_embeddings_values:
+        for comm_cost in commitment_cost_values:
+            # Update hyperparameters:
+            args.vq_num_embeddings = num_emb
+            args.vq_commitment_cost = float(comm_cost)  # ensure it's a float
+            args.model = "SmaAT_UNet_VQ_MSE_PartialMixConv"
+            # Define a folder name that reflects the hyperparameter settings:
+            # I think this does nothing
+            args.save_folder = f"SmaAT-UNet-VQ-MSE-num{num_emb}-commitment{comm_cost:.4f}"
             
-    #         print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
-    #         train_regression(args, find_batch_size_automatically=False)
+            print(f"Start training model: {args.model} with vq_num_embeddings={num_emb} and vq_commitment_cost={comm_cost:.4f}")
+            train_regression(args, find_batch_size_automatically=False)

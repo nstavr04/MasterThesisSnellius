@@ -19,7 +19,7 @@ class UNet_base(pl.LightningModule):
             "--model",
             type=str,
             default="SmaAT_UNet_VQ_MSE",
-            choices=["SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE", "SmaAT_UNet"],
+            choices=["SmaAT_UNet_VQ_MSE_FullMixConv", "SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE", "SmaAT_UNet"],
         )
         # Basic model arguments
         parser.add_argument("--n_channels", type=int, default=12)
@@ -33,7 +33,7 @@ class UNet_base(pl.LightningModule):
         parser.add_argument("--vq_commitment_cost", type=float, default=0.25)
 
         # Loss type for the VQ model variations
-        parser.add_argument("--model_type", type=str, default="partialmixconv", choices=["partialmixconv", "nomixconv"])
+        parser.add_argument("--model_type", type=str, default="partialmixconv", choices=["fullmixconv", "partialmixconv", "nomixconv"])
 
         return parser
 

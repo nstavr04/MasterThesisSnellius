@@ -5,7 +5,10 @@ import lightning.pytorch as pl
 # Used in the plotting and for the comparison etc. in testing
 def get_model_class(model_file) -> tuple[type[pl.LightningModule], str]:
     
-    if "SmaAT_UNet_VQ_MSE_PartialMixConv" in model_file:
+    if "SmaAT_UNet_VQ_MSE_FullMixConv" in model_file:
+        model_name = "SmaAT_UNet_VQ_MSE_FullMixConv"
+        model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
+    elif "SmaAT_UNet_VQ_MSE_PartialMixConv" in model_file:
         model_name = "SmaAT_UNet_VQ_MSE_PartialMixConv"
         model = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ
     elif "SmaAT_UNet_VQ_MSE" in model_file:

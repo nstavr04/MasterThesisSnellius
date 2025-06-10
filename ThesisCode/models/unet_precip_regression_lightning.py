@@ -1,4 +1,4 @@
-from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS, MixDownDS, MixUpDS
+from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS, MixDownDS, MixUpDS, OutConv
 from models.layers import CBAM
 from models.regression_lightning import Precip_regression_base
 

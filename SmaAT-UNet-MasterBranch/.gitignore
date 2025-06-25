@@ -1,9 +1,0 @@
-data
-runs
-lightning
-logs
-checkpoints
-.ruff_cache
-.mypy_cache
-models/__pycache__/
-__pycache__/

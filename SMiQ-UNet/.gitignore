@@ -5,3 +5,4 @@ logs
 checkpoints
 models/__pycache__/
 __pycache__/
+.venv/

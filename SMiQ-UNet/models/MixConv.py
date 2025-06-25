@@ -4,8 +4,6 @@ import torch.nn.functional as F
 
 import numpy as np
 
-# 
-
 def split_layer(total_channels, num_groups):
     split = [int(np.ceil(total_channels / num_groups)) for _ in range(num_groups)]
     split[num_groups - 1] += total_channels - sum(split)

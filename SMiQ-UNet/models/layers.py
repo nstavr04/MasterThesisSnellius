@@ -2,7 +2,6 @@ import torch
 from torch import nn
 import torch.nn.functional as F
 
-
 # Taken from https://discuss.pytorch.org/t/is-there-any-layer-like-tensorflows-space-to-depth-function/3487/14
 class DepthToSpace(nn.Module):
     def __init__(self, block_size):
@@ -81,14 +80,9 @@ class DoubleDSConv(nn.Module):
     def forward(self, x):
         return self.double_ds_conv(x)
 
-# Everything upwards I think it's not being used
-######################################################
-# Everything downwards is needed
-
 class Flatten(nn.Module):
     def forward(self, x):
         return x.view(x.size(0), -1)
-
 
 class ChannelAttention(nn.Module):
     def __init__(self, input_channels, reduction_ratio=16):

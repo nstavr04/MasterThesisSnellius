@@ -84,7 +84,7 @@ def train_regression(hparams, i, find_batch_size_automatically: bool = False):
     # This can be used to speed up training with newer GPUs:
     # https://lightning.ai/docs/pytorch/stable/advanced/speed.html#low-precision-matrix-multiplication
     
-    # I can try it sometime. Low means fast but less precision, high means high precision but slower.
+    # Low means fast but less precision, high means high precision but slower.
     torch.set_float32_matmul_precision('high')
 
     # Track training time
@@ -143,7 +143,6 @@ if __name__ == "__main__":
     args.vq_commitment_cost = 0.75
 
     # Pick which models we want to train
-    # args.model = "UNet"
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MSE"
     # args.model = "SmaAT_UNet_VQ_MSE_PartialMixConv"

@@ -10,8 +10,7 @@ class SmaAT_UNet_VQ(Precip_regression_base):
         super().__init__(hparams)
         self.n_channels = self.hparams.n_channels
 
-        # I think this is set as 1 in regression_lightning at UNet_Base model because we have regression
-        # We set to 5 for CE because we have buckets
+        # This is set as 1 in regression_lightning at UNet_Base model because we have regression
         self.n_classes = self.hparams.n_classes
         self.bilinear = self.hparams.bilinear
         reduction_ratio = self.hparams.reduction_ratio
@@ -39,7 +38,7 @@ class SmaAT_UNet_VQ(Precip_regression_base):
         # Full MixConv
         elif self.hparams.model_type == "fullmixconv":
 
-             # DoubleConvDS defined in unet_parts_depthwise_separable.py
+            # DoubleConvDS defined in unet_parts_depthwise_separable.py
             self.inc = DoubleConvDS(self.n_channels, 64, kernels_per_layer=kernels_per_layer)
             # CBAM defined in layers.py
             self.cbam1 = CBAM(64, reduction_ratio=reduction_ratio)
@@ -113,7 +112,7 @@ class SmaAT_UNet_VQ(Precip_regression_base):
         self.outc = OutConv(64, self.n_classes)
 
     def forward(self, x):
-        # Encoder.
+        # Encoder
         x1 = self.inc(x)
         x1Att = self.cbam1(x1)
         x2 = self.down1(x1)
@@ -125,18 +124,18 @@ class SmaAT_UNet_VQ(Precip_regression_base):
         x5 = self.down4(x4)
         x5Att = self.cbam5(x5)
 
-        # VQ Bottleneck.
+        # VQ Bottleneck
         # 3rd argument here is a dict of both losses separately
         x5Quantized, vq_loss, loss_dict = self.vq(x5Att)
 
-        # Decoder using quantized features.
+        # Decoder using quantized features
         x = self.up1(x5Quantized, x4Att)
         x = self.up2(x, x3Att)
         x = self.up3(x, x2Att)
         x = self.up4(x, x1Att)
         logits = self.outc(x)
 
-        # Return logits and vq_loss; the training loop should combine these losses.
+        # Return logits and vq_loss; the training loop should combine these losses
         return logits, vq_loss, loss_dict
 
 class SmaAT_UNet_MixConv(Precip_regression_base):
@@ -144,8 +143,7 @@ class SmaAT_UNet_MixConv(Precip_regression_base):
         super().__init__(hparams)
         self.n_channels = self.hparams.n_channels
 
-        # I think this is set as 1 in regression_lightning at UNet_Base model because we have regression
-        # We set to 5 for CE because we have buckets
+        # This is set as 1 in regression_lightning at UNet_Base model because we have regression
         self.n_classes = self.hparams.n_classes
         self.bilinear = self.hparams.bilinear
         reduction_ratio = self.hparams.reduction_ratio
@@ -235,7 +233,7 @@ class SmaAT_UNet_MixConv(Precip_regression_base):
         self.outc = OutConv(64, self.n_classes)
 
     def forward(self, x):
-        # Encoder.
+        # Encoder
         x1 = self.inc(x)
         x1Att = self.cbam1(x1)
         x2 = self.down1(x1)
@@ -247,7 +245,7 @@ class SmaAT_UNet_MixConv(Precip_regression_base):
         x5 = self.down4(x4)
         x5Att = self.cbam5(x5)
 
-        # Decoder using quantized features.
+        # Decoder using quantized features
         x = self.up1(x5Att, x4Att)
         x = self.up2(x, x3Att)
         x = self.up3(x, x2Att)

@@ -2,9 +2,8 @@ from models.unet_parts_depthwise_separable import DoubleConvDS, UpDS, DownDS, Mi
 from models.layers import CBAM
 from models.regression_lightning import Precip_regression_base
 
-# This is the model I care about to expand.
 # It is an implementation of a U-Net-based architecture that incorporates depthwise separable convolutions 
-# (DoubleConvDS, DownDS, UpDS) and attention mechanisms (CBAM).
+# (DoubleConvDS, DownDS, UpDS) and attention mechanisms (CBAM)
 # It uses them from unet_parts_depthwise_separable.py
 
 # The base Precip_regression_base class is defined in regression_lightning.py and is passed as an argument.

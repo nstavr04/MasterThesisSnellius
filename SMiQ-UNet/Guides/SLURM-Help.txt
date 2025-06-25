@@ -26,13 +26,16 @@ Log into gpu node for testing:
 View the place of cuDNN:
 # ls /sw/arch/RHEL9/EB_production/2024/software/cuDNN/9.5.0.50-CUDA-12.6.0/lib
 
-The 2024 things needed:
-# module load 2024
-# module load Python/3.12.3-GCCcore-13.3.0
-# module load CUDA/12.6.0
-# module load cuDNN/9.5.0.50-CUDA-12.6.0
-# module load NCCL/2.22.3-GCCcore-13.3.0-CUDA-12.6.0
+The 2023 things needed:
+module load 2023
+module load Python/3.11.3-GCCcore-12.3.0
+module load HDF5/1.14.0-gompi-2023a
+module load CUDA/12.1.1
+module load cuDNN/8.9.2.26-CUDA-12.1.1
+module load NCCL/2.18.3-GCCcore-12.3.0-CUDA-12.1.1
 
-For now I am using the 2024 ones and changed the dependencies in rye with:
+Also need Python 3.11.3
+
+Also changed the dependencies in rye with:
 # "torch==2.2.2+cu126",
 # "torchvision>=0.16.0+cu126"

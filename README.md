@@ -2,6 +2,8 @@
 
 Code for the paper "SMiQ-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting"
 
+![smiq-unet](images/SMiQ-UNet-v5-white.png)
+
 # Datasets & Models
 If you want access to the dataset used in this paper, please contact s.mehrkanoon@uu.nl. 
 Please put the dataset into "\data\precipitation" directory for training and testing.
@@ -21,5 +23,11 @@ In order to compute all the metrics for your model you first need to move the mo
 
 To view examples of output from a trained model, use the plot_examples_specific.ipynb or plot_examples_top_k.ipynb files
 
+![predictions](images/image_predictions.png)
+
 # Explainability
 The XAI plots for gradcam can be obtained from running gradcamfull_updated.ipynb and the UMAP from running UMAP.ipynb
+
+![gradcam](images/gradcam_merged.png)
+
+![umap](images/UMAP-Merged.png)

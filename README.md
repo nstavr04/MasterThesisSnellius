@@ -5,7 +5,8 @@ Code for the paper "SMiQ-UNet: A Parameter-Efficient Vector-Quantized UNet for P
 ![smiq-unet](SMiQ-UNet/Images/SMiQ-UNet-v5-white.png)
 
 # Datasets & Models
-If you want access to the dataset used in this paper, please contact s.mehrkanoon@uu.nl. 
+If you want access to the dataset used in this paper, please visit https://github.com/HansBambel/SmaAt-UNet for further details.
+You can also contact s.mehrkanoon@uu.nl. 
 Please put the dataset into "\data\precipitation" directory for training and testing.
 
 To create the NL-50 dataset, use create_datasets.py file

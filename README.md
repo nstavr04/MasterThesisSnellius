@@ -13,7 +13,7 @@ To create the NL-50 dataset, use create_datasets.py file
 
 # Training
 For training on the precipitation task we used the train_precip_lightning.py file.
-Training was done using Pytorch-Lightning. The model was trained on Snellius HPC.
+Training was done using Pytorch-Lightning.
 The modules and libraries needed can be seen at Guides/SLURM-Help.txt and pyproject.toml
 
 # Testing

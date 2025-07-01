@@ -32,3 +32,7 @@ The XAI plots for gradcam can be obtained from running gradcamfull_updated.ipynb
 ![gradcam](SMiQ-UNet/Images/gradcam_merged.png)
 
 ![umap](SMiQ-UNet/Images/UMAP-Merged.png)
+
+# Citation
+
+If you use our data and code, please cite the paper using the following bibtex reference:

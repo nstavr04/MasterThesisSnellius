@@ -1,8 +1,8 @@
-# SMiQ-UNet
+# SmaAT-QMix-UNet
 
 Code for the paper "SmaAT-QMix-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting"
 
-![smiq-unet](SMiQ-UNet/Images/SMiQ-UNet-v5-white.png)
+![smiq-unet](SmaAT-QMix-UNet/Images/SMiQ-UNet-v5-white.png)
 
 # Datasets & Models
 If you want access to the dataset used in this paper, please visit https://github.com/HansBambel/SmaAt-UNet for further details.
@@ -24,12 +24,12 @@ In order to compute all the metrics for your model you first need to move the mo
 
 To view examples of output from a trained model, use the plot_examples_specific.ipynb or plot_examples_top_k.ipynb files
 
-![predictions](SMiQ-UNet/Images/image_predictions.png)
+![predictions](SmaAT-QMix-UNet/Images/image_predictions.png)
 
 # Explainability
 The XAI plots for gradcam can be obtained from running gradcamfull_updated.ipynb and the UMAP from running UMAP.ipynb
 
-![gradcam](SMiQ-UNet/Images/gradcam_merged.png)
+![gradcam](SmaAT-QMix-UNet/Images/gradcam_merged.png)
 
 ![umap](SMiQ-UNet/Images/UMAP-Merged.png)
 

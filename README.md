@@ -1,6 +1,6 @@
 # SMiQ-UNet
 
-Code for the paper "SMiQ-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting"
+Code for the paper "SmaAT-QMix-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting"
 
 ![smiq-unet](SMiQ-UNet/Images/SMiQ-UNet-v5-white.png)
 

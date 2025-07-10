@@ -211,12 +211,16 @@ class SmaAT_UNet_MixConv_VQ(Precip_regression_base):
         x5 = self.down4(x4)
         x5Att = self.cbam5(x5)
 
+        # VQ Bottleneck
+        # 3rd argument here is a dict of both losses separately
+        x5Quantized, vq_loss, loss_dict = self.vq(x5Att)
+
         # Decoder using quantized features
-        x = self.up1(x5Att, x4Att)
+        x = self.up1(x5Quantized, x4Att)
         x = self.up2(x, x3Att)
         x = self.up3(x, x2Att)
         x = self.up4(x, x1Att)
         logits = self.outc(x)
 
-        # Return logits
-        return logits
+        # Return logits and vq_loss; the training loop should combine these losses
+        return logits, vq_loss, loss_dict

@@ -90,6 +90,7 @@ def get_model_losses(model_folder, data_file):
     for model_file in tqdm(models, desc="Models", leave=True):
         model, model_name = model_classes.get_model_class(model_file)
         loaded_model = model.load_from_checkpoint(f"{model_folder}/{model_file}")
+        loaded_model.hparams.dataset_folder = data_file
 
         # Run testing; note that the test step now logs additional VQ losses.
         t0 = time.time()

@@ -17,22 +17,23 @@ from lightning.pytorch.tuner import Tuner
 
 
 def train_regression(hparams, i, find_batch_size_automatically: bool = False):
-    if hparams.model in ["SmaAT_UNet_VQ_MSE_FullMixConv"]:
-        hparams.model_type = "fullmixconv"
-        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
-    elif hparams.model in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
-        hparams.model_type = "partialmixconv"
-        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    # SmaAT-QMix-UNet
+    if hparams.model in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_MixConv_VQ(hparams=hparams)
+    # SmaAT-Mix-UNet
+    elif hparams.model in ["SmaAT_UNet_PartialMixConv_MSE"]:
+        net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_MixConv(hparams=hparams)
+    # SmaAT-Q-UNet
     elif hparams.model in ["SmaAT_UNet_VQ_MSE"]:
-        hparams.model_type = "nomixconv"
         net = SmaAT_UNet_VQ_lightning.SmaAT_UNet_VQ(hparams=hparams)
+    # SmaAT-UNet
     elif hparams.model in ["SmaAT_UNet"]:
         net = unet_regr.UNetDS_Attention(hparams=hparams)
     else:
         raise NotImplementedError(f"Model '{hparams.model}' not implemented")
 
     # Create a custom model name based on the model string and the VQ hyperparameters.
-    if hparams.model in ["SmaAT_UNet_VQ_MSE_FullMixConv", "SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE" ]:
+    if hparams.model in ["SmaAT_UNet_VQ_MSE_PartialMixConv", "SmaAT_UNet_VQ_MSE", "SmaAT_UNet_PartialMixConv_MSE"]:
         custom_model_name = (
             f"{hparams.model}-num{hparams.vq_num_embeddings}-commit{hparams.vq_commitment_cost}--{i}"
         )
@@ -145,10 +146,10 @@ if __name__ == "__main__":
     # Pick which models we want to train
     # args.model = "SmaAT_UNet"
     # args.model = "SmaAT_UNet_VQ_MSE"
+    # args.model = "SmaAT_UNet_PartialMixConv_MSE"
     # args.model = "SmaAT_UNet_VQ_MSE_PartialMixConv"
-    # args.model = "SmaAT_UNet_VQ_MSE_FullMixConv"
 
-    for i in range (1,20):
+    for i in range (1,2):
         for m in ["SmaAT_UNet_VQ_MSE_PartialMixConv"]:
             args.model = m
             print(f"Start training model: {m}")

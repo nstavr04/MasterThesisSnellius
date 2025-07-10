@@ -95,8 +95,12 @@ def get_model_losses(model_folder, data_file):
         t0 = time.time()
         model_loss = trainer.test(model=loaded_model, dataloaders=[test_dl])
         t_inf = time.time() - t0
-        mins, secs = divmod(int(t_inf), 60)
-        print(f"Total inference time: {mins}m {secs}s for {loaded_model}")
+
+        total_seconds = int(t_inf)
+        mins, secs = divmod(total_seconds, 60)
+        ms = int((t_inf - total_seconds) * 1000)
+
+        print(f"Total inference time: {mins}m {secs}s {ms}ms for {loaded_model}")
         
         # For clarity, you might want to extract "test_total_loss" from the returned dictionary.
         # Here we assume model_loss is a list of dictionaries.

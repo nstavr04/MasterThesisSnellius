@@ -36,6 +36,8 @@ class UNetDS_Attention(Precip_regression_base):
         self.cbam5 = CBAM(1024 // factor, reduction_ratio=reduction_ratio)
         # UpDS defined in unet_parts_depthwise_separable.py
         self.up1 = UpDS(1024, 512 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
+
+
         self.up2 = UpDS(512, 256 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up3 = UpDS(256, 128 // factor, self.bilinear, kernels_per_layer=kernels_per_layer)
         self.up4 = UpDS(128, 64, self.bilinear, kernels_per_layer=kernels_per_layer)

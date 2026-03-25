@@ -36,13 +36,16 @@ The XAI plots for gradcam can be obtained from running gradcamfull_updated.ipynb
 # Citation
 
 If you use our data and code, please cite the paper using the following bibtex reference:
+```
+@misc{stavrou2026smaatqmixunetparameterefficientvectorquantizedunet,  
+      title={SmaAT-QMix-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting},  
+      author={Nikolas Stavrou and Siamak Mehrkanoon},  
+      year={2026},  
+      eprint={2603.21879},  
+      archivePrefix={arXiv},  
+      primaryClass={cs.LG},  
+      url={https://arxiv.org/abs/2603.21879},  
+}  
+```
 
-@misc{stavrou2026smaatqmixunetparameterefficientvectorquantizedunet,
-      title={SmaAT-QMix-UNet: A Parameter-Efficient Vector-Quantized UNet for Precipitation Nowcasting}, 
-      author={Nikolas Stavrou and Siamak Mehrkanoon},
-      year={2026},
-      eprint={2603.21879},
-      archivePrefix={arXiv},
-      primaryClass={cs.LG},
-      url={https://arxiv.org/abs/2603.21879}, 
-}
+Link to preprint of the paper: https://arxiv.org/abs/2603.21879
